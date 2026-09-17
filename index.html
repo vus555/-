@@ -4,22 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#101b31">
-  <title>Business Phone</title>
+  <title>Телефон</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
   <style>
     :root {
       color-scheme: dark;
       --ink: #f7f9ff;
-      --muted: #b7c1d8;
-      --dim: #8290ad;
-      --line: rgba(255,255,255,.10);
-      --glass: rgba(18, 29, 51, .62);
-      --panel: rgba(21, 35, 60, .74);
-      --accent: #7b8cff;
-      --accent-2: #a6b1ff;
-      --success: #65d6a2;
-      --danger: #ff6a80;
       --shadow: 0 26px 80px rgba(0, 0, 0, .38), 0 6px 22px rgba(0,0,0,.20);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Nunito', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     * { box-sizing: border-box; }
@@ -30,15 +26,14 @@
       display: grid;
       place-items: center;
       overflow: hidden;
+      padding: 14px;
       color: var(--ink);
+      font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
       background:
         radial-gradient(circle at 15% 15%, rgba(88, 124, 255, .34), transparent 32%),
         radial-gradient(circle at 85% 80%, rgba(225, 104, 181, .22), transparent 30%),
         linear-gradient(135deg, #091223 0%, #131d35 48%, #0a1425 100%);
     }
-
-    button, input { font: inherit; }
-    button { -webkit-tap-highlight-color: transparent; }
 
     .ambient {
       position: fixed;
@@ -56,15 +51,30 @@
 
     .phone {
       position: relative;
-      width: min(100%, 430px);
-      height: min(900px, 100dvh);
-      min-height: 560px;
+      width: min(100%, 380px);
+      height: min(850px, calc(100dvh - 22px));
+      min-height: 540px;
       overflow: hidden;
       isolation: isolate;
       background: #0e1930;
-      box-shadow: var(--shadow);
+      border: 7px solid #10131c;
+      border-radius: 42px;
+      box-shadow:
+        0 0 0 1.5px rgba(255,255,255,.14),
+        0 26px 80px rgba(0,0,0,.55),
+        0 6px 22px rgba(0,0,0,.35);
     }
-    .phone::before {
+
+    .phone-screen {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 35px;
+      isolation: isolate;
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-screen::before {
       content: "";
       position: absolute;
       z-index: -2;
@@ -74,7 +84,7 @@
         radial-gradient(circle at 5% 69%, rgba(73, 206, 192, .16), transparent 33%),
         linear-gradient(160deg, #24395f 0%, #17294b 43%, #142541 100%);
     }
-    .phone::after {
+    .phone-screen::after {
       content: "";
       position: absolute;
       z-index: -1;
@@ -85,403 +95,607 @@
       mix-blend-mode: overlay;
     }
 
+    .phone-speaker {
+      position: absolute;
+      z-index: 20;
+      top: 12px;
+      left: 50%;
+      width: 90px;
+      height: 22px;
+      border-radius: 12px;
+      background: #05070c;
+      transform: translateX(-50%);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,.06);
+    }
+
     .statusbar {
-      height: calc(32px + env(safe-area-inset-top));
-      padding: calc(8px + env(safe-area-inset-top)) 22px 0;
+      position: absolute;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: calc(48px + env(safe-area-inset-top));
+      padding: calc(16px + env(safe-area-inset-top)) 24px 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: -.02em;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -.01em;
+      color: #ffffff;
+      transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .statusbar.hidden {
+      opacity: 0;
+      transform: translateY(-100%);
+      pointer-events: none;
+    }
+
+    #clock { font-family: 'Nunito', sans-serif; font-weight: 800; letter-spacing: -.02em; }
+
     .status-icons { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.96); }
     .status-icons svg { width: 17px; height: 17px; stroke-width: 2.25; }
-    .battery { display: flex; align-items: center; gap: 4px; font-size: 12px; }
-    .battery-shape { width: 23px; height: 11px; padding: 1.5px; border: 1.6px solid currentColor; border-radius: 3.5px; position: relative; }
+    .battery { display: flex; align-items: center; gap: 5px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; }
+    .battery-shape { width: 24px; height: 12px; padding: 1.5px; border: 1.6px solid currentColor; border-radius: 3.5px; position: relative; }
     .battery-shape::after { content:""; position: absolute; right: -3.5px; top: 3px; width: 2px; height: 4px; border-radius: 0 2px 2px 0; background: currentColor; }
     .battery-level { display: block; width: 80%; height: 100%; border-radius: 1.5px; background: currentColor; }
 
-    .home {
-      position: absolute;
-      inset: 0;
+    .desktop {
+      flex: 1;
+      position: relative;
+      z-index: 5;
+      padding: 70px 12px 12px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+    .desktop::-webkit-scrollbar { display: none; }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      justify-items: center;
+      gap: 18px 4px;
+      margin-bottom: 14px;
+    }
+
+    .app-item {
       display: flex;
       flex-direction: column;
-      transition: opacity .28s ease, transform .38s cubic-bezier(.2,.8,.2,1);
-    }
-    .home.is-hidden { opacity: 0; transform: scale(.94); pointer-events: none; }
-    .welcome { padding: 26px 22px 14px; }
-    .eyebrow {
-      margin: 0 0 6px;
-      color: rgba(233, 239, 255, .72);
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-    }
-    .greeting { margin: 0; font-size: clamp(28px, 8vw, 34px); line-height: 1.06; letter-spacing: -.055em; }
-    .greeting span { color: #b9c3ff; }
-
-    .quick-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      padding: 8px 20px 18px;
-    }
-    .stat-card {
-      display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px;
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 18px;
-      background: rgba(16, 30, 56, .34);
-      box-shadow: inset 0 1px rgba(255,255,255,.08);
-      backdrop-filter: blur(16px);
-    }
-    .stat-icon { width: 30px; height: 30px; padding: 7px; border-radius: 11px; background: rgba(255,255,255,.13); }
-    .stat-icon svg { width: 100%; height: 100%; }
-    .stat-copy { min-width: 0; }
-    .stat-value { display:block; font-size: 14px; font-weight: 780; letter-spacing: -.025em; }
-    .stat-label { display:block; margin-top: 1px; color: var(--muted); font-size: 10px; white-space: nowrap; }
-
-    .apps-wrap { flex: 1; overflow-y: auto; padding: 0 18px 112px; scrollbar-width: none; }
-    .apps-wrap::-webkit-scrollbar { display: none; }
-    .section-title { display: flex; justify-content: space-between; align-items: center; margin: 0 2px 13px; }
-    .section-title h2 { margin: 0; font-size: 15px; letter-spacing: -.025em; }
-    .section-title span { color: rgba(235,240,255,.58); font-size: 12px; }
-    .app-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17px 7px; }
-    .app-button {
-      min-width: 0;
-      padding: 0;
-      color: var(--ink);
-      border: 0;
+      gap: 6px;
       background: transparent;
+      border: 0;
+      padding: 0;
       cursor: pointer;
-      display: grid;
-      justify-items: center;
-      gap: 7px;
-      outline-offset: 4px;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      width: 100%;
+      max-width: 80px;
     }
-    .app-button:active .app-icon { transform: scale(.88); filter: brightness(.91); }
-    .app-icon {
+
+    .app-item .app-icon-wrap {
+      position: relative;
+      width: clamp(52px, 15vw, 60px);
+      aspect-ratio: 1;
+    }
+
+    .app-item .app-icon {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 33%;
+      background: var(--app-color);
+      overflow: hidden;
+      transition: transform .18s ease, filter .18s ease;
+      box-shadow:
+        0 4px 10px rgba(0,0,0,.28),
+        0 1px 3px rgba(0,0,0,.18),
+        inset 0 1px rgba(255,255,255,.12);
+    }
+    .app-item:active .app-icon {
+      transform: scale(.9);
+      filter: brightness(.92);
+    }
+
+    .app-item .app-icon svg {
+      position: relative;
+      z-index: 1;
+      width: 58%;
+      height: 58%;
+      color: #ffffff;
+    }
+
+    /* 📝 НАЗВАНИЯ НА РУССКОМ */
+    .app-item .app-label {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      line-height: 1.15;
+      color: #ffffff;
+      letter-spacing: -.01em;
+      text-shadow: 0 1px 3px rgba(0,0,0,.6);
+      text-align: center;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-item[data-app="market"]    { --app-color: #E57328; }
+    .app-item[data-app="notes"]     { --app-color: #D9A207; }
+    .app-item[data-app="shops"]     { --app-color: #D93E56; }
+    .app-item[data-app="warehouse"] { --app-color: #8A6240; }
+    .app-item[data-app="staff"]     { --app-color: #8657CC; }
+    .app-item[data-app="website"]   { --app-color: #2E75CC; }
+    .app-item[data-app="realty"]    { --app-color: #199F7C; }
+    .app-item[data-app="delivery"]  { --app-color: #D89A14; }
+
+    /* ===== ДОК ===== */
+    .dock {
+      position: relative;
+      z-index: 15;
+      margin: 0 14px 32px;
+      padding: 22px 16px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 6px;
+      min-height: 100px;
+
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow:
+        0 10px 34px rgba(2, 7, 20, .18),
+        inset 0 1px rgba(255,255,255,.10);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+    }
+
+    /* 🎯 Обёртка приложения в доке (иконка + подпись) */
+    .dock-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      width: 100%;
+      max-width: 70px;
+    }
+
+    .dock-app {
       position: relative;
       display: grid;
       place-items: center;
-      width: clamp(56px, 15.2vw, 64px);
+      width: clamp(48px, 13.5vw, 56px);
       aspect-ratio: 1;
-      overflow: hidden;
-      border-radius: 21px;
-      background: var(--app-gradient);
-      box-shadow: 0 10px 20px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.34);
+      padding: 0;
+      border: 0;
+      border-radius: 33%;
+      background: var(--app-color);
+      cursor: pointer;
+      overflow: visible;
       transition: transform .18s ease, filter .18s ease;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow:
+        0 4px 10px rgba(0,0,0,.28),
+        0 1px 3px rgba(0,0,0,.18),
+        inset 0 1px rgba(255,255,255,.12);
     }
-    .app-icon::before { content:""; position:absolute; inset: 1px 1px 50%; border-radius: 20px 20px 45% 45%; background: linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0)); }
-    .app-icon::after { content:""; position:absolute; width: 70%; height: 26%; top: -9%; left: -10%; border-radius: 50%; background: rgba(255,255,255,.27); filter: blur(7px); transform: rotate(-23deg); }
-    .app-icon svg { position: relative; z-index: 1; width: 58%; height: 58%; filter: drop-shadow(0 2px 1px rgba(0,0,0,.13)); }
-    .app-name { display: block; max-width: 82px; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,.95); font-size: 10.5px; font-weight: 650; line-height: 1.16; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.35); }
-    .app-button[data-app="messenger"] .app-icon { --app-gradient: linear-gradient(145deg, #41beff, #3979e8); }
-    .app-button[data-app="market"] .app-icon { --app-gradient: linear-gradient(145deg, #ffae64, #f2743a); }
-    .app-button[data-app="wallet"] .app-icon { --app-gradient: linear-gradient(145deg, #d0a178, #855546); }
-    .app-button[data-app="notes"] .app-icon { --app-gradient: linear-gradient(145deg, #ffe779, #edaa32); }
-    .app-button[data-app="shops"] .app-icon { --app-gradient: linear-gradient(145deg, #ff8e9a, #e9516c); }
-    .app-button[data-app="warehouse"] .app-icon { --app-gradient: linear-gradient(145deg, #c5a985, #79604d); }
-    .app-button[data-app="staff"] .app-icon { --app-gradient: linear-gradient(145deg, #c89cff, #825dda); }
-    .app-button[data-app="website"] .app-icon { --app-gradient: linear-gradient(145deg, #78ccff, #3f72e4); }
-    .app-button[data-app="realty"] .app-icon { --app-gradient: linear-gradient(145deg, #77e4bd, #238c80); }
-    .app-button[data-app="delivery"] .app-icon { --app-gradient: linear-gradient(145deg, #ffe16a, #e8a615); }
-    .app-button[data-app="analytics"] .app-icon { --app-gradient: linear-gradient(145deg, #78dfea, #2d94bd); }
-    .app-button[data-app="empire"] .app-icon { --app-gradient: linear-gradient(145deg, #f6a5cf, #bb4f88); }
-    .app-badge { position:absolute; top: -5px; right: -5px; z-index: 2; min-width: 21px; height: 21px; padding: 0 5px; display:grid; place-items:center; border-radius: 999px; color:white; background: var(--danger); border: 2px solid #24395f; box-shadow: 0 3px 8px rgba(34, 10, 20, .4); font-size: 11px; font-weight: 800; transform: scale(0); transition: transform .3s cubic-bezier(.2,1.5,.4,1); }
-    .app-badge.show { transform: scale(1); }
+    .dock-item:active .dock-app { transform: scale(.9); filter: brightness(.92); }
 
-    .dock {
+    .dock-app .icon-inner {
       position: absolute;
-      z-index: 5;
-      right: 15px;
-      bottom: max(17px, env(safe-area-inset-bottom));
-      left: 15px;
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 14px;
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 24px;
-      background: rgba(243, 247, 255, .13);
-      box-shadow: 0 10px 34px rgba(2, 7, 20, .28), inset 0 1px rgba(255,255,255,.18);
-      backdrop-filter: blur(22px) saturate(145%);
+      inset: 0;
+      border-radius: 33%;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      background: var(--app-color);
     }
-    .dock-icon { display:grid; place-items:center; width: 36px; height: 36px; padding: 8px; color: white; border-radius: 13px; background: rgba(255,255,255,.11); }
-    .dock-icon svg { width: 100%; height: 100%; }
+    .dock-app svg {
+      position: relative;
+      z-index: 1;
+      width: 58%;
+      height: 58%;
+      color: #ffffff;
+    }
 
+    .dock-app .icon-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 33%;
+      display: block;
+    }
+
+    /* 📝 Название приложения в доке (русский) */
+    .dock-label {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      line-height: 1.15;
+      color: #ffffff;
+      letter-spacing: -.01em;
+      text-shadow: 0 1px 3px rgba(0,0,0,.6);
+      text-align: center;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dock-item[data-app="phone"]   { --app-color: #2FB855; }
+    .dock-item[data-app="message"] { --app-color: #2B8EF0; }
+    .dock-item[data-app="market2"] { --app-color: #E57328; }
+    .dock-item[data-app="wallet"]  { --app-color: #9E6538; }
+
+    .dock-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      z-index: 10;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 5px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #ffffff;
+      background: #ff3b30;
+      border: 2px solid #24395f;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      box-shadow: 0 3px 8px rgba(255, 59, 48, .5);
+      transform: scale(0);
+      transition: transform .4s cubic-bezier(.2, 1.5, .5, 1);
+      pointer-events: none;
+    }
+    .dock-badge.show { transform: scale(1); }
+
+    /* ===== УВЕДОМЛЕНИЕ ===== */
     .notification {
       position: absolute;
       z-index: 30;
-      top: calc(42px + env(safe-area-inset-top));
+      top: calc(55px + env(safe-area-inset-top));
       right: 14px;
       left: 14px;
       display: flex;
       gap: 12px;
       padding: 13px;
-      border: 1px solid rgba(255,255,255,.22);
-      border-radius: 20px;
-      color: #17223a;
-      background: rgba(247, 250, 255, .88);
-      box-shadow: 0 18px 50px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.95);
-      backdrop-filter: blur(24px) saturate(160%);
+
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow:
+        0 10px 34px rgba(2, 7, 20, .18),
+        inset 0 1px rgba(255,255,255,.10);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+
       opacity: 0;
       transform: translateY(-140%) scale(.94);
       pointer-events: none;
-      transition: opacity .35s ease, transform .5s cubic-bezier(.16,1,.3,1);
+      transition: opacity .35s ease, transform .55s cubic-bezier(.16,1,.3,1);
+      font-family: 'Nunito', sans-serif;
+      color: #ffffff;
     }
-    .notification.show { opacity: 1; transform: translateY(0) scale(1); }
-    .notification-avatar, .avatar { display:grid; place-items:center; flex: 0 0 auto; border-radius: 50%; color: white; font-weight: 800; }
-    .notification-avatar { width: 40px; height: 40px; background: linear-gradient(135deg,#40b9ff,#5874db); }
+    .notification.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .notification-avatar {
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      color: #ffffff;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      background: #2B8EF0;
+    }
     .notification-text { min-width: 0; flex: 1; }
-    .notification-top { display:flex; align-items:center; justify-content:space-between; gap: 8px; margin-bottom:2px; font-size: 12px; }
-    .notification-top b { font-size: 13px; }
-    .notification-time { color: #68748d; font-size: 11px; white-space: nowrap; }
-    .notification-message { overflow: hidden; color: #536078; font-size: 12px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
-
-    .screen {
-      position: absolute;
-      z-index: 10;
-      inset: 0;
+    .notification-top {
       display: flex;
-      flex-direction: column;
-      background: #101d34;
-      opacity: 0;
-      transform: translateY(18px) scale(.97);
-      pointer-events: none;
-      transition: opacity .25s ease, transform .42s cubic-bezier(.2,.8,.2,1);
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 3px;
+      font-size: 12px;
     }
-    .screen.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-    .screen-header { display:flex; align-items:center; min-height: calc(66px + env(safe-area-inset-top)); padding: calc(12px + env(safe-area-inset-top)) 18px 12px; border-bottom: 1px solid var(--line); background: rgba(15, 28, 50, .75); backdrop-filter: blur(18px); }
-    .back { display:grid; place-items:center; width: 38px; height: 38px; margin-right: 9px; padding: 0; color: var(--ink); border: 0; border-radius: 13px; background: rgba(255,255,255,.08); cursor: pointer; }
-    .back:hover { background: rgba(255,255,255,.15); }
-    .back svg { width: 20px; height: 20px; }
-    .screen-title { margin: 0; font-size: 18px; line-height:1.1; letter-spacing: -.035em; }
-    .screen-subtitle { margin: 3px 0 0; color: var(--dim); font-size: 11px; }
-    .screen-action { margin-left: auto; display:grid; place-items:center; width: 37px; height: 37px; color: #e5e9ff; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.06); }
-    .screen-action svg { width: 18px; height: 18px; }
+    .notification-top b {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,.2);
+    }
+    .notification-time {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .notification-message {
+      overflow: hidden;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-shadow: 0 1px 2px rgba(0,0,0,.15);
+    }
 
-    .feature-screen { background: radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--theme) 22%, transparent), transparent 33%), linear-gradient(160deg, #12223d, #0d172b); }
-    .feature-scroll { flex: 1; overflow-y: auto; padding: 21px 18px calc(42px + env(safe-area-inset-bottom)); scrollbar-width: none; }
-    .feature-scroll::-webkit-scrollbar { display:none; }
-    .feature-hero { position:relative; min-height: 180px; overflow:hidden; padding: 20px; border: 1px solid rgba(255,255,255,.12); border-radius: 27px; background: linear-gradient(145deg, color-mix(in srgb, var(--theme) 56%, #3b4665), color-mix(in srgb, var(--theme) 30%, #152746)); box-shadow: inset 0 1px rgba(255,255,255,.22), 0 15px 35px rgba(0,0,0,.17); }
-    .feature-hero::before { content:""; position:absolute; width: 190px; aspect-ratio:1; right:-64px; top:-92px; border: 20px solid rgba(255,255,255,.12); border-radius: 50%; }
-    .feature-hero .hero-icon { position:absolute; right: 20px; bottom: 17px; display:grid; place-items:center; width: 66px; aspect-ratio:1; padding: 15px; border-radius: 22px; background: rgba(255,255,255,.18); box-shadow: inset 0 1px rgba(255,255,255,.26); }
-    .hero-icon svg { width:100%; height:100%; }
-    .feature-kicker { position: relative; margin: 0 0 13px; color: rgba(255,255,255,.72); font-size: 11px; font-weight: 750; letter-spacing: .1em; text-transform:uppercase; }
-    .feature-value { position: relative; margin: 0; max-width: 230px; font-size: 31px; font-weight: 800; line-height: 1; letter-spacing: -.06em; }
-    .feature-note { position: relative; max-width: 210px; margin: 9px 0 0; color: rgba(255,255,255,.82); font-size: 12px; line-height: 1.4; }
-    .content-heading { margin: 23px 2px 12px; color: rgba(241,244,255,.94); font-size: 14px; letter-spacing: -.02em; }
-    .list-card { overflow:hidden; border: 1px solid var(--line); border-radius: 21px; background: rgba(255,255,255,.06); }
-    .list-row { display:flex; align-items:center; gap: 12px; min-height: 61px; padding: 10px 13px; border-bottom: 1px solid var(--line); }
-    .list-row:last-child { border-bottom: 0; }
-    .row-icon { display:grid; place-items:center; width: 37px; height: 37px; padding: 9px; border-radius: 13px; color: var(--row-color, #a9b7ff); background: color-mix(in srgb, var(--row-color, #a9b7ff) 16%, transparent); }
-    .row-icon svg { width:100%; height:100%; }
-    .row-body { min-width:0; flex:1; }
-    .row-title { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#f1f4ff; font-size: 13px; font-weight: 700; }
-    .row-detail { display:block; overflow:hidden; margin-top: 3px; color:var(--dim); font-size: 11px; text-overflow:ellipsis; white-space:nowrap; }
-    .row-value { color: var(--success); font-size: 12px; font-weight: 750; white-space:nowrap; }
-    .progress { height: 7px; margin: 20px 1px 6px; overflow:hidden; border-radius: 99px; background: rgba(255,255,255,.12); }
-    .progress i { display:block; width: var(--progress, 65%); height:100%; border-radius:inherit; background: linear-gradient(90deg, var(--theme), color-mix(in srgb, var(--theme) 55%, white)); box-shadow: 0 0 16px color-mix(in srgb, var(--theme) 70%, transparent); }
-    .progress-caption { display:flex; justify-content:space-between; color:var(--dim); font-size: 10px; }
-
-    .messenger { background: linear-gradient(160deg, #121f36, #0c172a); }
-    .chat-list { flex:1; overflow-y:auto; padding: 12px 10px calc(25px + env(safe-area-inset-bottom)); }
-    .chat-item { display:flex; align-items:center; gap: 12px; width:100%; padding: 11px 9px; color:inherit; text-align:left; border:0; border-radius: 16px; background: transparent; cursor:pointer; }
-    .chat-item:hover, .chat-item:focus-visible { background: rgba(255,255,255,.07); outline:0; }
-    .avatar { position:relative; width: 49px; height:49px; font-size: 17px; box-shadow: inset 0 1px rgba(255,255,255,.25); }
-    .avatar.online::after { content:""; position:absolute; right:1px; bottom:1px; width:11px; height:11px; border:2px solid #172640; border-radius:50%; background:var(--success); }
-    .chat-main { min-width:0; flex:1; }
-    .chat-row { display:flex; justify-content:space-between; gap:10px; }
-    .chat-name { overflow:hidden; color:#f5f7ff; font-size:14px; font-weight: 750; text-overflow:ellipsis; white-space:nowrap; }
-    .chat-time { color:var(--dim); font-size:10px; white-space:nowrap; }
-    .chat-preview { overflow:hidden; margin-top:4px; color:var(--dim); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
-    .unread { display:grid; place-items:center; align-self:flex-end; min-width:18px; height:18px; margin-bottom:1px; padding:0 5px; color:#fff; border-radius:99px; background:#5d79ff; font-size:10px; font-weight:800; }
-
-    .conversation { z-index: 14; transform: translateX(100%); transition: transform .36s cubic-bezier(.2,.8,.2,1); pointer-events:auto; background: #0e1a2d; }
-    .conversation.open { transform:translateX(0); }
-    .conversation .screen-header { min-height: calc(68px + env(safe-area-inset-top)); }
-    .conversation-header-avatar { width: 36px; height:36px; margin-right: 10px; font-size:13px; }
-    .chat-person { min-width:0; flex:1; }
-    .chat-person h2 { overflow:hidden; margin:0; font-size:15px; text-overflow:ellipsis; white-space:nowrap; }
-    .chat-person p { margin:2px 0 0; color:var(--success); font-size:10px; }
-    .messages { flex:1; overflow-y:auto; padding: 16px 12px; background-image: radial-gradient(rgba(170,190,235,.08) .7px, transparent .7px); background-size: 15px 15px; }
-    .day-pill { width:max-content; margin:0 auto 14px; padding:5px 9px; border-radius: 99px; color:#a9b5cb; background:rgba(21,36,61,.8); font-size:10px; }
-    .message { max-width: 78%; width:max-content; margin-bottom: 7px; padding: 9px 10px 6px; color:#eff3ff; border:1px solid rgba(255,255,255,.07); border-radius: 16px 16px 16px 4px; background:#1d2e4b; box-shadow: 0 4px 10px rgba(0,0,0,.08); font-size:13px; line-height:1.35; animation: messageIn .24s ease both; }
-    .message.out { margin-left:auto; border-color:rgba(144,157,255,.25); border-radius:16px 16px 4px 16px; background:linear-gradient(145deg,#6777eb,#5266d6); }
-    .message-time { margin:3px 0 0; color:rgba(232,239,255,.59); font-size:9px; text-align:right; }
-    @keyframes messageIn { from { opacity:0; transform: translateY(7px); } to { opacity:1; transform:none; } }
-    .suggestions { display:flex; gap:7px; overflow-x:auto; padding:9px 12px 7px; border-top:1px solid var(--line); background:#14223a; scrollbar-width:none; }
-    .suggestions::-webkit-scrollbar { display:none; }
-    .suggestion { flex:0 0 auto; padding:7px 11px; color:#dce3ff; border:1px solid rgba(126,145,255,.36); border-radius:12px; background:rgba(101,119,236,.11); cursor:pointer; font-size:11px; }
-    .suggestion:active { transform:scale(.96); }
-    .composer { display:flex; align-items:center; gap:8px; padding: 8px 12px max(10px, env(safe-area-inset-bottom)); border-top:1px solid var(--line); background:#14223a; }
-    .composer input { min-width:0; flex:1; height:40px; padding:0 13px; color:var(--ink); outline:none; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:#0e1a2d; font-size:13px; }
-    .composer input:focus { border-color:rgba(137,151,255,.76); box-shadow:0 0 0 3px rgba(102,120,255,.14); }
-    .send { display:grid; place-items:center; flex:0 0 auto; width:40px; height:40px; padding:10px; color:white; border:0; border-radius:14px; background:linear-gradient(145deg,#7c8dff,#576be0); box-shadow:0 7px 15px rgba(69,84,204,.3); cursor:pointer; }
-    .send svg { width:100%; height:100%; }
-    .send:active { transform:scale(.92); }
-
-    .home-indicator { position:absolute; z-index:40; bottom:6px; left:50%; width:118px; height:4px; border-radius:99px; background:rgba(255,255,255,.78); transform:translateX(-50%); }
-    @media (min-width: 500px) { .phone { height: min(900px, calc(100dvh - 30px)); border: 8px solid #10131c; border-radius: 38px; box-shadow: 0 0 0 1px rgba(255,255,255,.14), var(--shadow); } .phone .statusbar { padding-left:18px; padding-right:18px; } .home-indicator { bottom:5px; } }
-    @media (max-height: 620px) { .welcome { padding-top:15px; padding-bottom:7px; } .quick-stats { padding-bottom:11px; } .app-grid { gap:12px 7px; } .app-icon { width:52px; border-radius:18px; } .apps-wrap { padding-bottom:86px; } }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+    @media (max-width: 380px) {
+      .phone {
+        width: min(100%, 340px);
+        height: min(800px, calc(100dvh - 16px));
+        border-width: 6px;
+        border-radius: 36px;
+      }
+      .phone-screen { border-radius: 30px; }
+      .statusbar { padding-left: 20px; padding-right: 20px; }
+      .dock { margin: 0 10px 26px; padding: 18px 10px; min-height: 92px; border-radius: 30px; }
+      .notification { top: calc(52px + env(safe-area-inset-top)); right: 10px; left: 10px; padding: 11px; }
+      .desktop { padding: 66px 8px 10px; }
+      .app-grid { gap: 16px 4px; }
+      .app-item .app-label { font-size: 10px; }
+      .dock-label { font-size: 9px; }
+    }
   </style>
 </head>
 <body>
-  <div class="ambient one"></div><div class="ambient two"></div>
-  <main class="phone" aria-label="Интерфейс бизнес-телефона">
-    <svg aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
-      <defs>
-        <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a7.3 7.3 0 0 1-7.7 7.3 8.2 8.2 0 0 1-3.6-.8L4 19.5l1.4-4.1A7 7 0 0 1 4.7 12 7.3 7.3 0 0 1 12.3 4 7.3 7.3 0 0 1 20 11.5Z"/><path d="M8.5 11.5h.01M12.2 11.5h.01M15.9 11.5h.01" stroke-width="2.8"/></symbol>
-        <symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m4 9 1.4-4h13.2L20 9v2.1a2.5 2.5 0 0 1-4 2 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4-2V9Z" fill="currentColor" stroke="none"/><path d="M5.5 13.1V20h13v-6.9M9 20v-4h6v4"/></symbol>
-        <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4.5 7.5h13A2.5 2.5 0 0 1 20 10v8.5H4.5A2.5 2.5 0 0 1 2 16V8.5A2.5 2.5 0 0 1 4.5 6H18"/><path d="M15.5 13h4.5v3h-4.5a1.5 1.5 0 1 1 0-3Z" fill="currentColor" stroke="none"/></symbol>
-        <symbol id="i-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9l3 3V20.5H6z"/><path d="M15 3.5v3h3M9 11h6M9 15h4"/></symbol>
-        <symbol id="i-shop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 9.5 5 5h14l1.5 4.5v1.2c0 1.2-1 2.2-2.2 2.2-1 0-1.8-.6-2.1-1.4a2.3 2.3 0 0 1-4.4 0 2.3 2.3 0 0 1-4.4 0A2.3 2.3 0 0 1 3.5 10.7V9.5Z"/><path d="M5.5 12.6V20h13v-7.4M9 20v-4h6v4"/></symbol>
-        <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m4 7 8-4 8 4-8 4-8-4Z"/><path d="M4 7v10l8 4 8-4V7M12 11v10"/><path d="m8 5 8 4"/></symbol>
-        <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16.5 5.5a3 3 0 0 1 0 5.8M16 14.4a5 5 0 0 1 4.5 5.6"/></symbol>
-        <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.3 2.5 3.4 5.5 3.4 9S14.3 18.5 12 21c-2.3-2.5-3.4-5.5-3.4-9S9.7 5.5 12 3Z"/></symbol>
-        <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 21V5l8-3v19M20 21V9l-8-2"/><path d="M7 8h2M7 12h2M7 16h2M15 11h2M15 15h2"/></symbol>
-        <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 5h11v12H3zM14 9h4l3 3v5h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></symbol>
-        <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/><path d="m3 9 7-5 6 9 6-7"/></symbol>
-        <symbol id="i-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m3 7 4.4 4L12 4l4.6 7L21 7l-2.2 11H5.2L3 7Z"/><path d="M5.2 21h13.6"/></symbol>
-        <symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 5-7 7 7 7"/></symbol>
-        <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
-        <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 3-7.5 18-3.4-7.1L3 10.5 21 3Z"/><path d="m10.1 13.9 4.7-4.7"/></symbol>
-        <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></symbol>
-        <symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19v-2M8 19v-5M12 19v-8M16 19v-11M20 19V4"/></symbol>
-        <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.5 5 5.2c-.8.5-1.1 1.5-.8 2.4 2 6 5.7 9.7 11.7 11.7.9.3 1.9 0 2.4-.8l1.7-3-3.8-2.3-1.7 2c-2.3-1-4.5-3.2-5.5-5.5l2-1.7L8 3.5Z"/></symbol>
-      </defs>
-    </svg>
+  <div class="ambient one"></div>
+  <div class="ambient two"></div>
 
-    <section class="home" id="home">
-      <div class="statusbar"><time id="clock">00:00</time><div class="status-icons"><svg><use href="#i-signal"/></svg><span class="battery"><span class="battery-shape"><i class="battery-level"></i></span><b>84</b></span></div></div>
-      <header class="welcome"><p class="eyebrow" id="today">Сегодня</p><h1 class="greeting">Твой день,<br><span>в твоих руках.</span></h1></header>
-      <section class="quick-stats" aria-label="Краткая сводка">
-        <div class="stat-card"><span class="stat-icon"><svg><use href="#i-chart"/></svg></span><span class="stat-copy"><b class="stat-value">+12,4%</b><span class="stat-label">продажи за неделю</span></span></div>
-        <div class="stat-card"><span class="stat-icon"><svg><use href="#i-message"/></svg></span><span class="stat-copy"><b class="stat-value">3 диалога</b><span class="stat-label">ждут ответа</span></span></div>
-      </section>
-      <div class="apps-wrap"><div class="section-title"><h2>Рабочее пространство</h2><span>12 приложений</span></div><nav class="app-grid" aria-label="Приложения" id="appGrid"></nav></div>
-      <nav class="dock" aria-label="Быстрые действия"><span class="dock-icon"><svg><use href="#i-phone"/></svg></span><span class="dock-icon"><svg><use href="#i-message"/></svg></span><span class="dock-icon"><svg><use href="#i-chart"/></svg></span><span class="dock-icon"><svg><use href="#i-globe"/></svg></span></nav>
-    </section>
+  <main class="phone" aria-label="Телефон">
+    <div class="phone-screen">
 
-    <aside class="notification" id="notification" aria-live="polite"><span class="notification-avatar" id="notificationAvatar">А</span><div class="notification-text"><div class="notification-top"><b id="notificationName">Андрей</b><span class="notification-time" id="notificationTime">сейчас</span></div><div class="notification-message" id="notificationMessage">Бро, есть iPhone 13?</div></div></aside>
+      <div class="phone-speaker"></div>
 
-    <section class="screen messenger" id="messengerScreen" aria-label="Messenger">
-      <header class="screen-header"><button class="back" type="button" aria-label="На главный экран" data-close><svg><use href="#i-arrow-left"/></svg></button><div><h2 class="screen-title">Сообщения</h2><p class="screen-subtitle">Все важные диалоги</p></div><span class="screen-action"><svg><use href="#i-search"/></svg></span></header>
-      <div class="chat-list" id="chatList"></div>
-    </section>
+      <svg aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
+        <defs>
+          <symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 19v-2M8 19v-5M12 19v-8M16 19v-11M20 19V4"/>
+          </symbol>
+          <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3.5 5 5.2c-.8.5-1.1 1.5-.8 2.4 2 6 5.7 9.7 11.7 11.7.9.3 1.9 0 2.4-.8l1.7-3-3.8-2.3-1.7 2c-2.3-1-4.5-3.2-5.5-5.5l2-1.7L8 3.5Z"/>
+          </symbol>
+          <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 11.5a7.3 7.3 0 0 1-7.7 7.3 8.2 8.2 0 0 1-3.6-.8L4 19.5l1.4-4.1A7 7 0 0 1 4.7 12 7.3 7.3 0 0 1 12.3 4 7.3 7.3 0 0 1 20 11.5Z"/>
+            <path d="M8.5 11.5h.01M12.2 11.5h.01M15.9 11.5h.01" stroke-width="2.8"/>
+          </symbol>
+          <symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+            <path d="m4 9 1.4-4h13.2L20 9v2.1a2.5 2.5 0 0 1-4 2 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4-2V9Z" fill="currentColor" stroke="none"/>
+            <path d="M5.5 13.1V20h13v-6.9M9 20v-4h6v4"/>
+          </symbol>
+          <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+            <path d="M4.5 7.5h13A2.5 2.5 0 0 1 20 10v8.5H4.5A2.5 2.5 0 0 1 2 16V8.5A2.5 2.5 0 0 1 4.5 6H18"/>
+            <path d="M15.5 13h4.5v3h-4.5a1.5 1.5 0 1 1 0-3Z" fill="currentColor" stroke="none"/>
+          </symbol>
+          <symbol id="i-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 3.5h9l3 3V20.5H6z"/>
+            <path d="M15 3.5v3h3M9 11h6M9 15h4"/>
+          </symbol>
+          <symbol id="i-shop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+            <path d="M3.5 9.5 5 5h14l1.5 4.5v1.2c0 1.2-1 2.2-2.2 2.2-1 0-1.8-.6-2.1-1.4a2.3 2.3 0 0 1-4.4 0 2.3 2.3 0 0 1-4.4 0A2.3 2.3 0 0 1 3.5 10.7V9.5Z"/>
+            <path d="M5.5 12.6V20h13v-7.4M9 20v-4h6v4"/>
+          </symbol>
+          <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+            <path d="m4 7 8-4 8 4-8 4-8-4Z"/>
+            <path d="M4 7v10l8 4 8-4V7M12 11v10"/>
+            <path d="m8 5 8 4"/>
+          </symbol>
+          <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3"/>
+            <path d="M3.5 20a5.5 5.5 0 0 1 11 0M16.5 5.5a3 3 0 0 1 0 5.8M16 14.4a5 5 0 0 1 4.5 5.6"/>
+          </symbol>
+          <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M3 12h18M12 3c2.3 2.5 3.4 5.5 3.4 9S14.3 18.5 12 21c-2.3-2.5-3.4-5.5-3.4-9S9.7 5.5 12 3Z"/>
+          </symbol>
+          <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+            <path d="M4 21V5l8-3v19M20 21V9l-8-2"/>
+            <path d="M7 8h2M7 12h2M7 16h2M15 11h2M15 15h2"/>
+          </symbol>
+          <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+            <path d="M3 5h11v12H3zM14 9h4l3 3v5h-7z"/>
+            <circle cx="7" cy="19" r="2"/>
+            <circle cx="18" cy="19" r="2"/>
+          </symbol>
+        </defs>
+      </svg>
 
-    <section class="screen conversation" id="conversationScreen" aria-label="Диалог">
-      <header class="screen-header"><button class="back" type="button" aria-label="К списку чатов" id="chatBack"><svg><use href="#i-arrow-left"/></svg></button><span class="avatar conversation-header-avatar" id="chatAvatar">А</span><div class="chat-person"><h2 id="chatName">Андрей</h2><p id="chatStatus">в сети</p></div><span class="screen-action"><svg><use href="#i-phone"/></svg></span></header>
-      <div class="messages" id="messages"></div><div class="suggestions" id="suggestions"></div>
-      <form class="composer" id="composer"><input id="messageInput" autocomplete="off" placeholder="Напишите сообщение…" aria-label="Сообщение"><button class="send" type="submit" aria-label="Отправить"><svg><use href="#i-send"/></svg></button></form>
-    </section>
+      <div class="statusbar" id="statusbar">
+        <time id="clock">00:00</time>
+        <div class="status-icons">
+          <svg><use href="#i-signal"/></svg>
+          <span class="battery">
+            <span class="battery-shape"><i class="battery-level"></i></span>
+            <b>84</b>
+          </span>
+        </div>
+      </div>
 
-    <section class="screen feature-screen" id="featureScreen" aria-label="Приложение"><header class="screen-header"><button class="back" type="button" aria-label="На главный экран" data-close><svg><use href="#i-arrow-left"/></svg></button><div><h2 class="screen-title" id="featureTitle">Приложение</h2><p class="screen-subtitle" id="featureSubtitle">Рабочее пространство</p></div><span class="screen-action"><svg><use href="#i-plus"/></svg></span></header><div class="feature-scroll" id="featureContent"></div></section>
-    <div class="home-indicator"></div>
+      <div class="desktop">
+        <div class="app-grid">
+
+          <button class="app-item" data-app="market">
+            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-store"/></svg></span></span>
+            <span class="app-label">Маркетплейс</span>
+          </button>
+
+          <button class="app-item" data-app="notes">
+            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-note"/></svg></span></span>
+            <span class="app-label">Заметки</span>
+          </button>
+
+          <button class="app-item" data-app="shops">
+            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-shop"/></svg></span></span>
+            <span class="app-label">Магазины</span>
+          </button>
+
+          <button class="app-item" data-app="warehouse">
+            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-box"/></svg></span></span>
+            <span class="app-label">Склад</span>
+          </button>
+
+          <button class="app-item" data-app="staff">
+            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-users"/></svg></span></span>
+            <span class="app-label">Сотрудники</span>
+          </button>
+
+          <button class="app-item" data-app="website">
+            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-globe"/></svg></span></span>
+            <span class="app-label">Сайт</span>
+          </button>
+
+          <button class="app-item" data-app="realty">
+            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-building"/></svg></span></span>
+            <span class="app-label">Недвижимость</span>
+          </button>
+
+          <button class="app-item" data-app="delivery">
+            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-truck"/></svg></span></span>
+            <span class="app-label">Доставка</span>
+          </button>
+
+        </div>
+      </div>
+
+      <nav class="dock" aria-label="Панель приложений">
+
+        <button class="dock-item" data-app="phone" aria-label="Телефон">
+          <span class="dock-app">
+            <span class="icon-inner"><svg><use href="#i-phone"/></svg></span>
+          </span>
+          <span class="dock-label">Телефон</span>
+        </button>
+
+        <button class="dock-item" data-app="message" aria-label="Сообщения">
+          <span class="dock-app">
+            <span class="icon-inner">
+              <img class="icon-img"
+                   src="https://i.postimg.cc/gJLn8Q96/Screenshot-2026-09-17-11-52-02-127-com-google-android-googlequicksearchbox-edit.jpg"
+                   alt="Сообщения">
+            </span>
+            <span class="dock-badge" id="msgBadge">1</span>
+          </span>
+          <span class="dock-label">Сообщения</span>
+        </button>
+
+        <button class="dock-item" data-app="market2" aria-label="Маркет">
+          <span class="dock-app">
+            <span class="icon-inner"><svg><use href="#i-store"/></svg></span>
+          </span>
+          <span class="dock-label">Маркет</span>
+        </button>
+
+        <button class="dock-item" data-app="wallet" aria-label="Кошелёк">
+          <span class="dock-app">
+            <span class="icon-inner"><svg><use href="#i-wallet"/></svg></span>
+          </span>
+          <span class="dock-label">Кошелёк</span>
+        </button>
+
+      </nav>
+
+      <aside class="notification" id="notification">
+        <span class="notification-avatar">А</span>
+        <div class="notification-text">
+          <div class="notification-top">
+            <b>Андрей</b>
+            <span class="notification-time" id="notifTime">сейчас</span>
+          </div>
+          <div class="notification-message">Бро, есть iPhone 13? Возьму за 40к</div>
+        </div>
+      </aside>
+
+    </div>
   </main>
 
   <script>
-    const icon = (name) => `<svg aria-hidden="true"><use href="#i-${name}"></use></svg>`;
-    const apps = [
-      { id:'messenger', label:'Messenger', icon:'message' },
-      { id:'market', label:'Marketplace', icon:'store', title:'Marketplace', subtitle:'Товары и спрос', kicker:'Продажи сегодня', value:'₽ 86 400', note:'8 новых заказов уже ждут обработки.', rows:[['iPhone 13 · 128 GB','3 просмотра за час','+₽ 42 000','chart'],['Xiaomi Redmi Note 13','В избранном у 12 человек','+₽ 13 900','store'],['AirPods Pro 2','Осталось 2 штуки','+₽ 18 500','box']], progress:72 },
-      { id:'wallet', label:'Wallet', icon:'wallet', title:'Wallet', subtitle:'Деньги и операции', kicker:'Доступно', value:'₽ 214 860', note:'Следующая выплата — завтра, в 10:00.', rows:[['Продажи за сегодня','8 успешных оплат','+₽ 86 400','chart'],['На рекламу','Лимит на сентябрь','₽ 18 500','note'],['Перевод поставщику','Оплачено сегодня','−₽ 32 000','send']], progress:64 },
-      { id:'notes', label:'Notes', icon:'note', title:'Notes', subtitle:'Идеи и напоминания', kicker:'В фокусе', value:'3 важных дела', note:'Небольшие шаги каждый день создают большой результат.', rows:[['Обновить цены на iPhone','До конца дня','Сегодня','note'],['Ответить поставщику','Запрос по новой партии','16:30','message'],['Снять обзор для сайта','Подготовить 3 позиции','Завтра','globe']], progress:45 },
-      { id:'shops', label:'Shops', icon:'shop', title:'Shops', subtitle:'Точки продаж', kicker:'Сеть магазинов', value:'4 точки', note:'2 магазина сегодня выше плана по выручке.', rows:[['Центральный · Киев','План выполнен на 118%','+18%','chart'],['Podil Mall','12 продаж за день','+8%','store'],['Sky Park','Нужно пополнить витрину','Внимание','box']], progress:81 },
-      { id:'warehouse', label:'Warehouse', icon:'box', title:'Warehouse', subtitle:'Товары на складе', kicker:'Остатки', value:'126 единиц', note:'Запаса хватит примерно на 18 дней активных продаж.', rows:[['iPhone 13','14 шт. · в норме','14','box'],['Samsung A55','3 шт. · пополнить','3','box'],['Чехлы MagSafe','48 шт. · в норме','48','box']], progress:58 },
-      { id:'staff', label:'Staff', icon:'users', title:'Staff', subtitle:'Команда и задачи', kicker:'Команда сегодня', value:'8 человек', note:'Все сотрудники на смене, 2 задачи требуют проверки.', rows:[['Елена Петрова','Продажи · на смене','Онлайн','users'],['Максим Коваль','Склад · инвентаризация','В работе','box'],['Саша Мельник','Контент · 2 публикации','Готово','note']], progress:89 },
-      { id:'website', label:'Website', icon:'globe', title:'Website', subtitle:'Сайт и заказы', kicker:'Конверсия', value:'4,8%', note:'Посетители чаще всего смотрят смартфоны и аксессуары.', rows:[['Посетители','За последние 24 часа','1 284','chart'],['Новые заказы','Оформлены через сайт','14','store'],['Скорость сайта','Хорошая оценка','92 / 100','globe']], progress:92 },
-      { id:'realty', label:'Realty', icon:'building', title:'Realty', subtitle:'Недвижимость', kicker:'Ваши объекты', value:'2 помещения', note:'Одно новое предложение находится в избранном.', rows:[['ТРЦ River Mall','46 м² · высокая проходимость','Новое','building'],['ул. Большая Васильковская','Действующая точка','Активно','shop'],['ул. Сагайдачного','Переговоры по аренде','Встреча','message']], progress:37 },
-      { id:'delivery', label:'Delivery', icon:'truck', title:'Delivery', subtitle:'Доставка и курьеры', kicker:'Доставки сегодня', value:'16 заказов', note:'13 доставлено, 3 курьера сейчас в пути.', rows:[['Заказ #2048','Курьер — 6 минут','В пути','truck'],['Заказ #2042','Успешно доставлен','Готово','store'],['Заказ #2037','Ожидает подтверждения','Внимание','message']], progress:81 },
-      { id:'analytics', label:'Analytics', icon:'chart', title:'Analytics', subtitle:'Рост и показатели', kicker:'Выручка за месяц', value:'₽ 1,24 млн', note:'Это на 12,4% выше, чем за предыдущий месяц.', rows:[['Средний чек','За последние 30 дней','₽ 8 420','chart'],['Повторные покупки','Доля клиентов','38%','users'],['Лучший канал','Marketplace','46%','store']], progress:76 },
-      { id:'empire', label:'Empire', icon:'crown', title:'Empire', subtitle:'Уровень и достижения', kicker:'Текущий уровень', value:'Предприниматель 12', note:'До следующего уровня осталось заработать 84 000 ₽.', rows:[['Месячная цель','Выручка к плану','76%','chart'],['Серия продаж','Дней с продажами подряд','14','crown'],['Рейтинг региона','Среди 248 предпринимателей','#18','users']], progress:76 }
-    ];
-
-    const chats = [
-      {id:'andrey', name:'Андрей', avatar:'А', color:'linear-gradient(145deg,#42bfff,#5472d7)', online:true, last:'Бро, есть iPhone 13? Возьму за 40к', time:'сейчас', unread:1, messages:[['in','Бро, есть iPhone 13? Возьму за 40к',''],], quick:['Да, есть! 42к','Скину фото','Какой цвет?','40к маловато']},
-      {id:'marina', name:'Марина', avatar:'М', color:'linear-gradient(145deg,#ff9dbe,#c76094)', online:true, last:'Привет! Xiaomi ещё в продаже?', time:'11:20', unread:0, messages:[['in','Привет! Xiaomi ещё в продаже?','11:20']], quick:['Да, в продаже','Какой именно?','Цена 8к']},
-      {id:'dmitry', name:'Дмитрий', avatar:'Д', color:'linear-gradient(145deg,#c9a078,#89614e)', online:false, last:'Спасибо, заберу завтра', time:'вчера', unread:0, messages:[['in','Спасибо, заберу завтра','вчера']], quick:['Отлично!','Ок, жду','Напомни адрес']}
-    ];
-    const replies = ['Ок, договорились!', 'Дай подумаю…', 'Скинь ещё фото', 'Хорошо, беру', 'Спасибо!', 'А торг возможен?'];
-    const $ = (selector, root=document) => root.querySelector(selector);
-    const clock = $('#clock'), today = $('#today'), home = $('#home'), appGrid = $('#appGrid');
-    const messengerScreen = $('#messengerScreen'), featureScreen = $('#featureScreen'), conversationScreen = $('#conversationScreen');
-    let activeChat = null;
-
-    function currentTime(){ return new Intl.DateTimeFormat('ru-RU',{hour:'2-digit',minute:'2-digit'}).format(new Date()); }
-    function updateTime(){
-      clock.textContent = currentTime();
-      today.textContent = new Intl.DateTimeFormat('ru-RU',{weekday:'long', day:'numeric', month:'long'}).format(new Date());
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock').textContent = h + ':' + m;
+      document.getElementById('notifTime').textContent = h + ':' + m;
     }
-    updateTime(); setInterval(updateTime, 10000);
+    updateClock();
+    setInterval(updateClock, 1000);
 
-    function renderApps(){
-      appGrid.innerHTML = apps.map(app => `<button class="app-button" type="button" data-app="${app.id}" aria-label="Открыть ${app.label}"><span class="app-icon">${icon(app.icon)}${app.id==='messenger'?'<span class="app-badge" id="homeBadge">1</span>':''}</span><span class="app-name">${app.label}</span></button>`).join('');
-      appGrid.addEventListener('click', (event) => { const button = event.target.closest('[data-app]'); if(button) openApp(button.dataset.app); });
+    document.querySelectorAll('.app-item, .dock-item').forEach(app => {
+      app.addEventListener('click', () => {
+        console.log('Открыть:', app.dataset.app);
+      });
+    });
+
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
 
-    function hideHome(){ home.classList.add('is-hidden'); }
-    function closeScreens(){ [messengerScreen, featureScreen, conversationScreen].forEach(screen => screen.classList.remove('open')); home.classList.remove('is-hidden'); }
-    function openApp(id){
-      const app = apps.find(item => item.id === id); if(!app) return;
-      hideHome();
-      if(id === 'messenger') { messengerScreen.classList.add('open'); $('#homeBadge')?.classList.remove('show'); chats.forEach(chat => chat.unread = 0); renderChats(); return; }
-      openFeature(app);
+    function playNotifSound() {
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+        const VOLUME = 0.08;
+
+        const o1 = audioCtx.createOscillator();
+        const g1 = audioCtx.createGain();
+        o1.type = 'sine';
+        o1.frequency.setValueAtTime(880, now);
+        o1.frequency.exponentialRampToValueAtTime(1320, now + 0.08);
+        g1.gain.setValueAtTime(0.0001, now);
+        g1.gain.exponentialRampToValueAtTime(VOLUME, now + 0.02);
+        g1.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+        o1.connect(g1).connect(audioCtx.destination);
+        o1.start(now); o1.stop(now + 0.25);
+
+        const o2 = audioCtx.createOscillator();
+        const g2 = audioCtx.createGain();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(1320, now + 0.1);
+        o2.frequency.exponentialRampToValueAtTime(1760, now + 0.2);
+        g2.gain.setValueAtTime(0.0001, now + 0.1);
+        g2.gain.exponentialRampToValueAtTime(VOLUME * 0.85, now + 0.12);
+        g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+        o2.connect(g2).connect(audioCtx.destination);
+        o2.start(now + 0.1); o2.stop(now + 0.4);
+      } catch (e) {}
     }
 
-    function openFeature(app){
-      featureScreen.style.setProperty('--theme', app.id === 'market' ? '#ff8b56' : document.querySelector(`[data-app="${app.id}"] .app-icon`) ? getComputedStyle(document.querySelector(`[data-app="${app.id}"] .app-icon`)).backgroundColor : '#7b8cff');
-      const themed = {wallet:'#cf9b70',notes:'#f1b83c',shops:'#f36678',warehouse:'#aa8b6d',staff:'#9d72ec',website:'#4e9bef',realty:'#39af8c',delivery:'#eeb522',analytics:'#41b7c4',empire:'#d15b9e',market:'#f27d49'};
-      featureScreen.style.setProperty('--theme', themed[app.id] || '#7b8cff');
-      $('#featureTitle').textContent = app.title;
-      $('#featureSubtitle').textContent = app.subtitle;
-      $('#featureContent').innerHTML = `<article class="feature-hero"><p class="feature-kicker">${app.kicker}</p><h3 class="feature-value">${app.value}</h3><p class="feature-note">${app.note}</p><span class="hero-icon">${icon(app.icon)}</span></article><h3 class="content-heading">Обзор</h3><div class="list-card">${app.rows.map(([title,detail,value,rowIcon]) => `<div class="list-row"><span class="row-icon" style="--row-color:var(--theme)">${icon(rowIcon)}</span><span class="row-body"><b class="row-title">${title}</b><small class="row-detail">${detail}</small></span><b class="row-value">${value}</b></div>`).join('')}</div><div class="progress" style="--progress:${app.progress}%"><i></i></div><div class="progress-caption"><span>Прогресс за месяц</span><b>${app.progress}%</b></div>`;
-      featureScreen.classList.add('open');
+    document.addEventListener('click', initAudio, { once: true });
+
+    function showNotification() {
+      const notif = document.getElementById('notification');
+      const badge = document.getElementById('msgBadge');
+      notif.classList.add('show');
+      badge.classList.add('show');
+      playNotifSound();
+      setTimeout(() => { notif.classList.remove('show'); }, 4500);
     }
 
-    function avatar(chat, className='avatar') { return `<span class="${className}${chat.online ? ' online' : ''}" style="background:${chat.color}">${chat.avatar}</span>`; }
-    function renderChats(){
-      $('#chatList').innerHTML = chats.map(chat => `<button class="chat-item" type="button" data-chat="${chat.id}">${avatar(chat)}<span class="chat-main"><span class="chat-row"><b class="chat-name">${chat.name}</b><time class="chat-time">${chat.time}</time></span><span class="chat-row"><span class="chat-preview">${chat.last}</span>${chat.unread ? `<span class="unread">${chat.unread}</span>`:''}</span></span></button>`).join('');
-    }
-    function escapeHTML(value){ const node = document.createElement('div'); node.textContent = value; return node.innerHTML; }
-    function addMessage(text, type, time=currentTime(), persist=true){
-      const safeText = escapeHTML(text).replace(/\n/g,'<br>');
-      $('#messages').insertAdjacentHTML('beforeend', `<article class="message ${type}">${safeText}<div class="message-time">${time}</div></article>`);
-      $('#messages').scrollTop = $('#messages').scrollHeight;
-      if(persist && activeChat){ activeChat.messages.push([type,text,time]); activeChat.last = text; activeChat.time = type === 'out' ? currentTime() : 'сейчас'; }
-    }
-    function openChat(id){
-      activeChat = chats.find(chat => chat.id === id); if(!activeChat) return;
-      activeChat.unread = 0; renderChats();
-      $('#chatAvatar').className = 'avatar conversation-header-avatar' + (activeChat.online?' online':''); $('#chatAvatar').style.background = activeChat.color; $('#chatAvatar').textContent = activeChat.avatar;
-      $('#chatName').textContent = activeChat.name; $('#chatStatus').textContent = activeChat.online ? 'в сети' : 'был(а) недавно';
-      $('#messages').innerHTML = '<div class="day-pill">Сегодня</div>';
-      activeChat.messages.forEach(([type,text,time]) => addMessage(text,type,time,false));
-      $('#suggestions').innerHTML = activeChat.quick.map(item => `<button class="suggestion" type="button">${item}</button>`).join('');
-      conversationScreen.classList.add('open'); $('#messages').scrollTop = $('#messages').scrollHeight;
-    }
-    function sendMessage(text){
-      const cleaned = text.trim(); if(!cleaned || !activeChat) return; addMessage(cleaned,'out'); $('#messageInput').value=''; renderChats();
-      window.setTimeout(() => { if(!activeChat) return; const reply = replies[Math.floor(Math.random()*replies.length)]; addMessage(reply,'in'); renderChats(); }, 1050);
-    }
-
-    $('#chatList').addEventListener('click', event => { const item = event.target.closest('[data-chat]'); if(item) openChat(item.dataset.chat); });
-    $('#suggestions').addEventListener('click', event => { const button = event.target.closest('.suggestion'); if(button) sendMessage(button.textContent); });
-    $('#composer').addEventListener('submit', event => { event.preventDefault(); sendMessage($('#messageInput').value); });
-    $('#chatBack').addEventListener('click', () => conversationScreen.classList.remove('open'));
-    document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', closeScreens));
-    document.addEventListener('keydown', event => { if(event.key === 'Escape') { if(conversationScreen.classList.contains('open')) conversationScreen.classList.remove('open'); else closeScreens(); } });
-
-    let audioContext;
-    function sound(){ try { audioContext ??= new (window.AudioContext || window.webkitAudioContext)(); const oscillator=audioContext.createOscillator(), gain=audioContext.createGain(), now=audioContext.currentTime; oscillator.frequency.setValueAtTime(740,now); oscillator.frequency.exponentialRampToValueAtTime(1110,now+.14); gain.gain.setValueAtTime(.0001,now); gain.gain.exponentialRampToValueAtTime(.035,now+.025); gain.gain.exponentialRampToValueAtTime(.0001,now+.24); oscillator.connect(gain).connect(audioContext.destination); oscillator.start(now); oscillator.stop(now+.25); } catch(_){} }
-    function showNotification(){ const chat = chats[0]; $('#notificationAvatar').textContent=chat.avatar; $('#notificationName').textContent=chat.name; $('#notificationMessage').textContent=chat.last; $('#notificationTime').textContent=currentTime(); $('#notification').classList.add('show'); $('#homeBadge')?.classList.add('show'); sound(); window.setTimeout(() => $('#notification').classList.remove('show'), 4300); }
-    document.addEventListener('pointerdown', () => { if(audioContext?.state === 'suspended') audioContext.resume(); }, {once:true});
-    renderApps(); renderChats(); window.setTimeout(showNotification, 1400);
+    setTimeout(showNotification, 2000);
   </script>
 </body>
 </html>
