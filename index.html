@@ -1,701 +1,130 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#101b31">
-  <title>Телефон</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#17294b">
+<title>PhoneBuy</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <style>
-    :root {
-      color-scheme: dark;
-      --ink: #f7f9ff;
-      --shadow: 0 26px 80px rgba(0, 0, 0, .38), 0 6px 22px rgba(0,0,0,.20);
-      font-family: 'Nunito', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100dvh;overflow:hidden;font-family:'Nunito',sans-serif}
 
-    * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
-    body {
-      margin: 0;
-      min-height: 100dvh;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      padding: 14px;
-      color: var(--ink);
-      font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
-      background:
-        radial-gradient(circle at 15% 15%, rgba(88, 124, 255, .34), transparent 32%),
-        radial-gradient(circle at 85% 80%, rgba(225, 104, 181, .22), transparent 30%),
-        linear-gradient(135deg, #091223 0%, #131d35 48%, #0a1425 100%);
-    }
+/* 🎨 СИНИЙ ФОН */
+body{
+  background: linear-gradient(160deg, #24395f 0%, #17294b 43%, #142541 100%);
+  position:relative;
+}
 
-    .ambient {
-      position: fixed;
-      width: 42vmax;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: .35;
-      pointer-events: none;
-      animation: drift 17s ease-in-out infinite alternate;
-    }
-    .ambient.one { left: -17vmax; top: -17vmax; background: #617aff; }
-    .ambient.two { right: -17vmax; bottom: -18vmax; background: #b556d4; animation-delay: -7s; }
-    @keyframes drift { to { transform: translate(8vmax, 4vmax) scale(1.12); } }
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(88,124,255,.35), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(225,104,181,.22), transparent 40%);
+  pointer-events:none;
+  z-index:0;
+}
 
-    .phone {
-      position: relative;
-      width: min(100%, 380px);
-      height: min(850px, calc(100dvh - 22px));
-      min-height: 540px;
-      overflow: hidden;
-      isolation: isolate;
-      background: #0e1930;
-      border: 7px solid #10131c;
-      border-radius: 42px;
-      box-shadow:
-        0 0 0 1.5px rgba(255,255,255,.14),
-        0 26px 80px rgba(0,0,0,.55),
-        0 6px 22px rgba(0,0,0,.35);
-    }
+.phone-screen{
+  position:relative;
+  z-index:2;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
 
-    .phone-screen {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      border-radius: 35px;
-      isolation: isolate;
-      display: flex;
-      flex-direction: column;
-    }
-    .phone-screen::before {
-      content: "";
-      position: absolute;
-      z-index: -2;
-      inset: 0;
-      background:
-        radial-gradient(circle at 85% 10%, rgba(113, 131, 255, .35), transparent 28%),
-        radial-gradient(circle at 5% 69%, rgba(73, 206, 192, .16), transparent 33%),
-        linear-gradient(160deg, #24395f 0%, #17294b 43%, #142541 100%);
-    }
-    .phone-screen::after {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      inset: 0;
-      opacity: .18;
-      pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E");
-      mix-blend-mode: overlay;
-    }
+/* ⚡ СТАТУС-БАР — БОЛЬШОЙ */
+.statusbar{
+  position:relative;z-index:10;
+  height:58px;
+  padding:20px 28px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  font-weight:800;
+  font-size:22px;
+  color:#fff;flex-shrink:0;
+}
+.status-right{display:flex;align-items:center;gap:9px}
 
-    .phone-speaker {
-      position: absolute;
-      z-index: 20;
-      top: 12px;
-      left: 50%;
-      width: 90px;
-      height: 22px;
-      border-radius: 12px;
-      background: #05070c;
-      transform: translateX(-50%);
-      box-shadow: inset 0 1px 2px rgba(255,255,255,.06);
-    }
+.status-right svg{
+  width:22px;
+  height:22px;
+}
 
-    .statusbar {
-      position: absolute;
-      z-index: 10;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: calc(48px + env(safe-area-inset-top));
-      padding: calc(16px + env(safe-area-inset-top)) 24px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 800;
-      font-size: 16px;
-      letter-spacing: -.01em;
-      color: #ffffff;
-      transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .statusbar.hidden {
-      opacity: 0;
-      transform: translateY(-100%);
-      pointer-events: none;
-    }
+.battery{
+  position:relative;
+  width:34px;
+  height:16px;
+  border:2px solid currentColor;
+  border-radius:5px;
+  padding:2px;
+}
+.battery::after{
+  content:'';
+  position:absolute;
+  right:-5px;top:4px;
+  width:3px;height:6px;
+  background:currentColor;
+  border-radius:0 2px 2px 0;
+}
+.battery i{
+  display:block;
+  width:80%;height:100%;
+  background:currentColor;
+  border-radius:2px;
+}
 
-    #clock { font-family: 'Nunito', sans-serif; font-weight: 800; letter-spacing: -.02em; }
+.battery-text{
+  font-size:20px;
+  font-weight:800;
+  margin-left:2px;
+}
 
-    .status-icons { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.96); }
-    .status-icons svg { width: 17px; height: 17px; stroke-width: 2.25; }
-    .battery { display: flex; align-items: center; gap: 5px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; }
-    .battery-shape { width: 24px; height: 12px; padding: 1.5px; border: 1.6px solid currentColor; border-radius: 3.5px; position: relative; }
-    .battery-shape::after { content:""; position: absolute; right: -3.5px; top: 3px; width: 2px; height: 4px; border-radius: 0 2px 2px 0; background: currentColor; }
-    .battery-level { display: block; width: 80%; height: 100%; border-radius: 1.5px; background: currentColor; }
-
-    .desktop {
-      flex: 1;
-      position: relative;
-      z-index: 5;
-      padding: 70px 12px 12px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: none;
-    }
-    .desktop::-webkit-scrollbar { display: none; }
-
-    .app-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      justify-items: center;
-      gap: 18px 4px;
-      margin-bottom: 14px;
-    }
-
-    .app-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      background: transparent;
-      border: 0;
-      padding: 0;
-      cursor: pointer;
-      font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
-      width: 100%;
-      max-width: 80px;
-    }
-
-    .app-item .app-icon-wrap {
-      position: relative;
-      width: clamp(52px, 15vw, 60px);
-      aspect-ratio: 1;
-    }
-
-    .app-item .app-icon {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      border-radius: 33%;
-      background: var(--app-color);
-      overflow: hidden;
-      transition: transform .18s ease, filter .18s ease;
-      box-shadow:
-        0 4px 10px rgba(0,0,0,.28),
-        0 1px 3px rgba(0,0,0,.18),
-        inset 0 1px rgba(255,255,255,.12);
-    }
-    .app-item:active .app-icon {
-      transform: scale(.9);
-      filter: brightness(.92);
-    }
-
-    .app-item .app-icon svg {
-      position: relative;
-      z-index: 1;
-      width: 58%;
-      height: 58%;
-      color: #ffffff;
-    }
-
-    /* 📝 НАЗВАНИЯ НА РУССКОМ */
-    .app-item .app-label {
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      font-size: 11px;
-      line-height: 1.15;
-      color: #ffffff;
-      letter-spacing: -.01em;
-      text-shadow: 0 1px 3px rgba(0,0,0,.6);
-      text-align: center;
-      width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .app-item[data-app="market"]    { --app-color: #E57328; }
-    .app-item[data-app="notes"]     { --app-color: #D9A207; }
-    .app-item[data-app="shops"]     { --app-color: #D93E56; }
-    .app-item[data-app="warehouse"] { --app-color: #8A6240; }
-    .app-item[data-app="staff"]     { --app-color: #8657CC; }
-    .app-item[data-app="website"]   { --app-color: #2E75CC; }
-    .app-item[data-app="realty"]    { --app-color: #199F7C; }
-    .app-item[data-app="delivery"]  { --app-color: #D89A14; }
-
-    /* ===== ДОК ===== */
-    .dock {
-      position: relative;
-      z-index: 15;
-      margin: 0 14px 32px;
-      padding: 22px 16px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      gap: 6px;
-      min-height: 100px;
-
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 34px;
-      background: rgba(255, 255, 255, 0.06);
-      box-shadow:
-        0 10px 34px rgba(2, 7, 20, .18),
-        inset 0 1px rgba(255,255,255,.10);
-      backdrop-filter: blur(20px) saturate(140%);
-      -webkit-backdrop-filter: blur(20px) saturate(140%);
-    }
-
-    /* 🎯 Обёртка приложения в доке (иконка + подпись) */
-    .dock-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      background: transparent;
-      border: 0;
-      padding: 0;
-      cursor: pointer;
-      font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
-      width: 100%;
-      max-width: 70px;
-    }
-
-    .dock-app {
-      position: relative;
-      display: grid;
-      place-items: center;
-      width: clamp(48px, 13.5vw, 56px);
-      aspect-ratio: 1;
-      padding: 0;
-      border: 0;
-      border-radius: 33%;
-      background: var(--app-color);
-      cursor: pointer;
-      overflow: visible;
-      transition: transform .18s ease, filter .18s ease;
-      -webkit-tap-highlight-color: transparent;
-      box-shadow:
-        0 4px 10px rgba(0,0,0,.28),
-        0 1px 3px rgba(0,0,0,.18),
-        inset 0 1px rgba(255,255,255,.12);
-    }
-    .dock-item:active .dock-app { transform: scale(.9); filter: brightness(.92); }
-
-    .dock-app .icon-inner {
-      position: absolute;
-      inset: 0;
-      border-radius: 33%;
-      overflow: hidden;
-      display: grid;
-      place-items: center;
-      background: var(--app-color);
-    }
-    .dock-app svg {
-      position: relative;
-      z-index: 1;
-      width: 58%;
-      height: 58%;
-      color: #ffffff;
-    }
-
-    .dock-app .icon-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 33%;
-      display: block;
-    }
-
-    /* 📝 Название приложения в доке (русский) */
-    .dock-label {
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      font-size: 10px;
-      line-height: 1.15;
-      color: #ffffff;
-      letter-spacing: -.01em;
-      text-shadow: 0 1px 3px rgba(0,0,0,.6);
-      text-align: center;
-      width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .dock-item[data-app="phone"]   { --app-color: #2FB855; }
-    .dock-item[data-app="message"] { --app-color: #2B8EF0; }
-    .dock-item[data-app="market2"] { --app-color: #E57328; }
-    .dock-item[data-app="wallet"]  { --app-color: #9E6538; }
-
-    .dock-badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      z-index: 10;
-      min-width: 22px;
-      height: 22px;
-      padding: 0 5px;
-      display: grid;
-      place-items: center;
-      border-radius: 999px;
-      color: #ffffff;
-      background: #ff3b30;
-      border: 2px solid #24395f;
-      font-family: 'Nunito', sans-serif;
-      font-size: 12px;
-      font-weight: 800;
-      line-height: 1;
-      box-shadow: 0 3px 8px rgba(255, 59, 48, .5);
-      transform: scale(0);
-      transition: transform .4s cubic-bezier(.2, 1.5, .5, 1);
-      pointer-events: none;
-    }
-    .dock-badge.show { transform: scale(1); }
-
-    /* ===== УВЕДОМЛЕНИЕ ===== */
-    .notification {
-      position: absolute;
-      z-index: 30;
-      top: calc(55px + env(safe-area-inset-top));
-      right: 14px;
-      left: 14px;
-      display: flex;
-      gap: 12px;
-      padding: 13px;
-
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.06);
-      box-shadow:
-        0 10px 34px rgba(2, 7, 20, .18),
-        inset 0 1px rgba(255,255,255,.10);
-      backdrop-filter: blur(20px) saturate(140%);
-      -webkit-backdrop-filter: blur(20px) saturate(140%);
-
-      opacity: 0;
-      transform: translateY(-140%) scale(.94);
-      pointer-events: none;
-      transition: opacity .35s ease, transform .55s cubic-bezier(.16,1,.3,1);
-      font-family: 'Nunito', sans-serif;
-      color: #ffffff;
-    }
-    .notification.show {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    .notification-avatar {
-      display: grid;
-      place-items: center;
-      flex: 0 0 auto;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      color: #ffffff;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 800;
-      font-size: 17px;
-      background: #2B8EF0;
-    }
-    .notification-text { min-width: 0; flex: 1; }
-    .notification-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 3px;
-      font-size: 12px;
-    }
-    .notification-top b {
-      font-size: 14px;
-      font-weight: 800;
-      color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0,0,0,.2);
-    }
-    .notification-time {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 11.5px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .notification-message {
-      overflow: hidden;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 13px;
-      font-weight: 600;
-      line-height: 1.35;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-shadow: 0 1px 2px rgba(0,0,0,.15);
-    }
-
-    @media (max-width: 380px) {
-      .phone {
-        width: min(100%, 340px);
-        height: min(800px, calc(100dvh - 16px));
-        border-width: 6px;
-        border-radius: 36px;
-      }
-      .phone-screen { border-radius: 30px; }
-      .statusbar { padding-left: 20px; padding-right: 20px; }
-      .dock { margin: 0 10px 26px; padding: 18px 10px; min-height: 92px; border-radius: 30px; }
-      .notification { top: calc(52px + env(safe-area-inset-top)); right: 10px; left: 10px; padding: 11px; }
-      .desktop { padding: 66px 8px 10px; }
-      .app-grid { gap: 16px 4px; }
-      .app-item .app-label { font-size: 10px; }
-      .dock-label { font-size: 9px; }
-    }
-  </style>
+/* ⚡ РАМКА (ДОК) — ЧУТЬ БОЛЬШЕ */
+.dock{
+  position:fixed;
+  bottom:24px;
+  left:12px;
+  right:12px;
+  height:130px;                            /* ⬆ было 112 → 130 */
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:34px;                      /* ⬆ было 32 → 34 */
+  background:rgba(255,255,255,0.06);
+  box-shadow:0 10px 34px rgba(2,7,20,.18),inset 0 1px rgba(255,255,255,.10);
+  backdrop-filter:blur(20px) saturate(140%);
+  -webkit-backdrop-filter:blur(20px) saturate(140%);
+  z-index:15;
+}
+</style>
 </head>
 <body>
-  <div class="ambient one"></div>
-  <div class="ambient two"></div>
 
-  <main class="phone" aria-label="Телефон">
-    <div class="phone-screen">
-
-      <div class="phone-speaker"></div>
-
-      <svg aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
-        <defs>
-          <symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M4 19v-2M8 19v-5M12 19v-8M16 19v-11M20 19V4"/>
-          </symbol>
-          <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 3.5 5 5.2c-.8.5-1.1 1.5-.8 2.4 2 6 5.7 9.7 11.7 11.7.9.3 1.9 0 2.4-.8l1.7-3-3.8-2.3-1.7 2c-2.3-1-4.5-3.2-5.5-5.5l2-1.7L8 3.5Z"/>
-          </symbol>
-          <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 11.5a7.3 7.3 0 0 1-7.7 7.3 8.2 8.2 0 0 1-3.6-.8L4 19.5l1.4-4.1A7 7 0 0 1 4.7 12 7.3 7.3 0 0 1 12.3 4 7.3 7.3 0 0 1 20 11.5Z"/>
-            <path d="M8.5 11.5h.01M12.2 11.5h.01M15.9 11.5h.01" stroke-width="2.8"/>
-          </symbol>
-          <symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-            <path d="m4 9 1.4-4h13.2L20 9v2.1a2.5 2.5 0 0 1-4 2 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4-2V9Z" fill="currentColor" stroke="none"/>
-            <path d="M5.5 13.1V20h13v-6.9M9 20v-4h6v4"/>
-          </symbol>
-          <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-            <path d="M4.5 7.5h13A2.5 2.5 0 0 1 20 10v8.5H4.5A2.5 2.5 0 0 1 2 16V8.5A2.5 2.5 0 0 1 4.5 6H18"/>
-            <path d="M15.5 13h4.5v3h-4.5a1.5 1.5 0 1 1 0-3Z" fill="currentColor" stroke="none"/>
-          </symbol>
-          <symbol id="i-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 3.5h9l3 3V20.5H6z"/>
-            <path d="M15 3.5v3h3M9 11h6M9 15h4"/>
-          </symbol>
-          <symbol id="i-shop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-            <path d="M3.5 9.5 5 5h14l1.5 4.5v1.2c0 1.2-1 2.2-2.2 2.2-1 0-1.8-.6-2.1-1.4a2.3 2.3 0 0 1-4.4 0 2.3 2.3 0 0 1-4.4 0A2.3 2.3 0 0 1 3.5 10.7V9.5Z"/>
-            <path d="M5.5 12.6V20h13v-7.4M9 20v-4h6v4"/>
-          </symbol>
-          <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-            <path d="m4 7 8-4 8 4-8 4-8-4Z"/>
-            <path d="M4 7v10l8 4 8-4V7M12 11v10"/>
-            <path d="m8 5 8 4"/>
-          </symbol>
-          <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="9" cy="8" r="3"/>
-            <path d="M3.5 20a5.5 5.5 0 0 1 11 0M16.5 5.5a3 3 0 0 1 0 5.8M16 14.4a5 5 0 0 1 4.5 5.6"/>
-          </symbol>
-          <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <circle cx="12" cy="12" r="9"/>
-            <path d="M3 12h18M12 3c2.3 2.5 3.4 5.5 3.4 9S14.3 18.5 12 21c-2.3-2.5-3.4-5.5-3.4-9S9.7 5.5 12 3Z"/>
-          </symbol>
-          <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-            <path d="M4 21V5l8-3v19M20 21V9l-8-2"/>
-            <path d="M7 8h2M7 12h2M7 16h2M15 11h2M15 15h2"/>
-          </symbol>
-          <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-            <path d="M3 5h11v12H3zM14 9h4l3 3v5h-7z"/>
-            <circle cx="7" cy="19" r="2"/>
-            <circle cx="18" cy="19" r="2"/>
-          </symbol>
-        </defs>
-      </svg>
-
-      <div class="statusbar" id="statusbar">
-        <time id="clock">00:00</time>
-        <div class="status-icons">
-          <svg><use href="#i-signal"/></svg>
-          <span class="battery">
-            <span class="battery-shape"><i class="battery-level"></i></span>
-            <b>84</b>
-          </span>
-        </div>
-      </div>
-
-      <div class="desktop">
-        <div class="app-grid">
-
-          <button class="app-item" data-app="market">
-            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-store"/></svg></span></span>
-            <span class="app-label">Маркетплейс</span>
-          </button>
-
-          <button class="app-item" data-app="notes">
-            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-note"/></svg></span></span>
-            <span class="app-label">Заметки</span>
-          </button>
-
-          <button class="app-item" data-app="shops">
-            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-shop"/></svg></span></span>
-            <span class="app-label">Магазины</span>
-          </button>
-
-          <button class="app-item" data-app="warehouse">
-            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-box"/></svg></span></span>
-            <span class="app-label">Склад</span>
-          </button>
-
-          <button class="app-item" data-app="staff">
-            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-users"/></svg></span></span>
-            <span class="app-label">Сотрудники</span>
-          </button>
-
-          <button class="app-item" data-app="website">
-            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-globe"/></svg></span></span>
-            <span class="app-label">Сайт</span>
-          </button>
-
-          <button class="app-item" data-app="realty">
-            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-building"/></svg></span></span>
-            <span class="app-label">Недвижимость</span>
-          </button>
-
-          <button class="app-item" data-app="delivery">
-            <span class="app-icon-wrap"><span class="app-icon"><svg><use href="#i-truck"/></svg></span></span>
-            <span class="app-label">Доставка</span>
-          </button>
-
-        </div>
-      </div>
-
-      <nav class="dock" aria-label="Панель приложений">
-
-        <button class="dock-item" data-app="phone" aria-label="Телефон">
-          <span class="dock-app">
-            <span class="icon-inner"><svg><use href="#i-phone"/></svg></span>
-          </span>
-          <span class="dock-label">Телефон</span>
-        </button>
-
-        <button class="dock-item" data-app="message" aria-label="Сообщения">
-          <span class="dock-app">
-            <span class="icon-inner">
-              <img class="icon-img"
-                   src="https://i.postimg.cc/gJLn8Q96/Screenshot-2026-09-17-11-52-02-127-com-google-android-googlequicksearchbox-edit.jpg"
-                   alt="Сообщения">
-            </span>
-            <span class="dock-badge" id="msgBadge">1</span>
-          </span>
-          <span class="dock-label">Сообщения</span>
-        </button>
-
-        <button class="dock-item" data-app="market2" aria-label="Маркет">
-          <span class="dock-app">
-            <span class="icon-inner"><svg><use href="#i-store"/></svg></span>
-          </span>
-          <span class="dock-label">Маркет</span>
-        </button>
-
-        <button class="dock-item" data-app="wallet" aria-label="Кошелёк">
-          <span class="dock-app">
-            <span class="icon-inner"><svg><use href="#i-wallet"/></svg></span>
-          </span>
-          <span class="dock-label">Кошелёк</span>
-        </button>
-
-      </nav>
-
-      <aside class="notification" id="notification">
-        <span class="notification-avatar">А</span>
-        <div class="notification-text">
-          <div class="notification-top">
-            <b>Андрей</b>
-            <span class="notification-time" id="notifTime">сейчас</span>
-          </div>
-          <div class="notification-message">Бро, есть iPhone 13? Возьму за 40к</div>
-        </div>
-      </aside>
-
+<div class="phone-screen">
+  <div class="statusbar">
+    <time id="clock">00:00</time>
+    <div class="status-right">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19v-2M8 19v-5M12 19v-8M16 19v-11M20 19V4"/></svg>
+      <span class="battery"><i></i></span>
+      <b class="battery-text">84</b>
     </div>
-  </main>
+  </div>
+</div>
 
-  <script>
-    function updateClock() {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('clock').textContent = h + ':' + m;
-      document.getElementById('notifTime').textContent = h + ':' + m;
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
+<nav class="dock"></nav>
 
-    document.querySelectorAll('.app-item, .dock-item').forEach(app => {
-      app.addEventListener('click', () => {
-        console.log('Открыть:', app.dataset.app);
-      });
-    });
-
-    let audioCtx = null;
-    function initAudio() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    function playNotifSound() {
-      try {
-        initAudio();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        const now = audioCtx.currentTime;
-        const VOLUME = 0.08;
-
-        const o1 = audioCtx.createOscillator();
-        const g1 = audioCtx.createGain();
-        o1.type = 'sine';
-        o1.frequency.setValueAtTime(880, now);
-        o1.frequency.exponentialRampToValueAtTime(1320, now + 0.08);
-        g1.gain.setValueAtTime(0.0001, now);
-        g1.gain.exponentialRampToValueAtTime(VOLUME, now + 0.02);
-        g1.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
-        o1.connect(g1).connect(audioCtx.destination);
-        o1.start(now); o1.stop(now + 0.25);
-
-        const o2 = audioCtx.createOscillator();
-        const g2 = audioCtx.createGain();
-        o2.type = 'sine';
-        o2.frequency.setValueAtTime(1320, now + 0.1);
-        o2.frequency.exponentialRampToValueAtTime(1760, now + 0.2);
-        g2.gain.setValueAtTime(0.0001, now + 0.1);
-        g2.gain.exponentialRampToValueAtTime(VOLUME * 0.85, now + 0.12);
-        g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-        o2.connect(g2).connect(audioCtx.destination);
-        o2.start(now + 0.1); o2.stop(now + 0.4);
-      } catch (e) {}
-    }
-
-    document.addEventListener('click', initAudio, { once: true });
-
-    function showNotification() {
-      const notif = document.getElementById('notification');
-      const badge = document.getElementById('msgBadge');
-      notif.classList.add('show');
-      badge.classList.add('show');
-      playNotifSound();
-      setTimeout(() => { notif.classList.remove('show'); }, 4500);
-    }
-
-    setTimeout(showNotification, 2000);
-  </script>
+<script>
+function tick(){
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick,1000);
+</script>
 </body>
 </html>
