@@ -40,36 +40,36 @@ body::before{
   flex-direction:column;
 }
 
-/* ⚡ СТАТУС-БАР — БОЛЬШОЙ */
+/* ⚡ СТАТУС-БАР */
 .statusbar{
   position:relative;z-index:10;
-  height:58px;
-  padding:20px 28px 0;
+  height:50px;
+  padding:16px 26px 0;
   display:flex;align-items:center;justify-content:space-between;
   font-weight:800;
-  font-size:22px;
+  font-size:17px;
   color:#fff;flex-shrink:0;
 }
-.status-right{display:flex;align-items:center;gap:9px}
+.status-right{display:flex;align-items:center;gap:7px}
 
 .status-right svg{
-  width:22px;
-  height:22px;
+  width:17px;
+  height:17px;
 }
 
 .battery{
   position:relative;
-  width:34px;
-  height:16px;
-  border:2px solid currentColor;
-  border-radius:5px;
-  padding:2px;
+  width:26px;
+  height:13px;
+  border:1.7px solid currentColor;
+  border-radius:4px;
+  padding:1.7px;
 }
 .battery::after{
   content:'';
   position:absolute;
-  right:-5px;top:4px;
-  width:3px;height:6px;
+  right:-4px;top:3.5px;
+  width:2.5px;height:5px;
   background:currentColor;
   border-radius:0 2px 2px 0;
 }
@@ -77,24 +77,24 @@ body::before{
   display:block;
   width:80%;height:100%;
   background:currentColor;
-  border-radius:2px;
+  border-radius:1.7px;
 }
 
 .battery-text{
-  font-size:20px;
+  font-size:15px;
   font-weight:800;
   margin-left:2px;
 }
 
-/* ⚡ РАМКА (ДОК) — ЧУТЬ БОЛЬШЕ */
+/* ⚡ РАМКА (ДОК) — ПОМЕНЬШЕ ПО ВЕРТИКАЛИ */
 .dock{
   position:fixed;
   bottom:24px;
   left:12px;
   right:12px;
-  height:130px;                            /* ⬆ было 112 → 130 */
+  height:118px;                            /* ⬇ было 130 → 118 */
   border:1px solid rgba(255,255,255,.10);
-  border-radius:34px;                      /* ⬆ было 32 → 34 */
+  border-radius:32px;                      /* ⬇ было 34 → 32 */
   background:rgba(255,255,255,0.06);
   box-shadow:0 10px 34px rgba(2,7,20,.18),inset 0 1px rgba(255,255,255,.10);
   backdrop-filter:blur(20px) saturate(140%);
