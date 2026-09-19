@@ -68,10 +68,10 @@ body::before{
 .battery i{display:block;width:80%;height:100%;background:currentColor;border-radius:1.7px}
 .battery-text{font-size:15px;font-weight:800;margin-left:2px}
 
-/* ⚡ ИКОНКИ — ЕЩЁ ВЫШЕ */
+/* ⚡ СЕТКА ИКОНОК */
 .desktop{
   flex:1;
-  padding:30px 8px 10px;              /* ⬆ было 42 → 30 (выше) */
+  padding:30px 8px 24px;
   overflow-y:auto;
   scrollbar-width:none;
 }
@@ -82,7 +82,6 @@ body::before{
   grid-template-columns:repeat(4,1fr);
   justify-items:center;
   gap:20px 4px;
-  margin-bottom:20px;
 }
 
 .app-item{
@@ -93,8 +92,12 @@ body::before{
   -webkit-tap-highlight-color:transparent;
 }
 
-/* ⚡ ИКОНКИ СВЕРХУ — КАК СНИЗУ (60–72px) */
 .app-icon-wrap{position:relative;width:clamp(60px,17vw,72px);aspect-ratio:1}
+
+/* 📏 ЧУТЬ-ЧУТЬ БОЛЬШЕ обычных */
+.app-item.semi-big .app-icon-wrap{
+  width:clamp(66px,18.5vw,78px);
+}
 
 .app-icon{
   position:absolute;inset:0;
@@ -117,61 +120,29 @@ body::before{
   filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));
 }
 
+/* 🖼 КАРТИНКА — БЕЗ РАМКИ, БЕЗ ТЕНИ */
+.app-icon.has-image{
+  background: transparent;
+  box-shadow: none;
+}
+.app-icon.has-image::before{ display:none; }
+.app-icon.has-image .icon-img{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  border-radius: 42%;
+  display:block;z-index:1;
+  filter: none;
+}
+
 .app-label{
   font-weight:700;font-size:11.5px;line-height:1.15;color:#fff;
   text-shadow:0 1px 3px rgba(0,0,0,.6);text-align:center;width:100%;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
-/* ⚡ ДОК */
-.dock{
-  position:fixed;
-  bottom:24px;
-  left:12px;
-  right:12px;
-  height:118px;
-  padding:14px 8px;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  gap:4px;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:32px;
-  background:rgba(255,255,255,0.06);
-  box-shadow:0 10px 34px rgba(2,7,20,.18),inset 0 1px rgba(255,255,255,.10);
-  backdrop-filter:blur(20px) saturate(140%);
-  -webkit-backdrop-filter:blur(20px) saturate(140%);
-  z-index:15;
-}
-
-.dock-item{
-  display:flex;flex-direction:column;align-items:center;gap:5px;
-  background:transparent;border:0;padding:0;
-  cursor:pointer;font-family:inherit;
-  width:100%;max-width:80px;
-  -webkit-tap-highlight-color:transparent;
-}
-
-.dock-app{
-  position:relative;
-  width:clamp(60px,17vw,72px);aspect-ratio:1;
-  border-radius:33%;background:var(--app-color);
-  overflow:visible;
-  display:grid;place-items:center;
-  box-shadow:0 6px 14px rgba(0,0,0,.35),0 3px 6px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.12);
-}
-.dock-app svg{
-  position:relative;z-index:3;
-  width:58%;height:58%;color:#fff;
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));
-}
-
-.dock-label{
-  font-weight:700;font-size:11.5px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);
-  text-align:center;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-
-.dock-badge{
+/* 🔴 БЕЙДЖ на иконке */
+.app-badge{
   position:absolute;top:-6px;right:-6px;z-index:10;min-width:23px;height:23px;padding:0 6px;
   display:grid;place-items:center;border-radius:999px;color:#fff;background:#ff3b30;
   border:2.5px solid #24395f;font-size:12px;font-weight:800;
@@ -193,41 +164,47 @@ body::before{
   <div class="desktop">
     <div class="app-grid">
 
-      <div class="app-item">
+      <!-- 🛒 МАРКЕТПЛЕЙС -->
+      <div class="app-item semi-big">
         <span class="app-icon-wrap">
-          <span class="app-icon" style="--app-color:#E57328">
-            <svg viewBox="0 0 48 48" fill="none">
-              <path d="M6 20 L10 8 L38 8 L42 20 Z" fill="#fff"/>
-              <rect x="9" y="8" width="4" height="12" fill="#E57328" opacity="0.9"/>
-              <rect x="17" y="8" width="4" height="12" fill="#E57328" opacity="0.9"/>
-              <rect x="25" y="8" width="4" height="12" fill="#E57328" opacity="0.9"/>
-              <rect x="33" y="8" width="4" height="12" fill="#E57328" opacity="0.9"/>
-              <path d="M6 20 L7 23 L41 23 L42 20 Z" fill="#fff" opacity="0.85"/>
-              <rect x="9" y="23" width="30" height="17" fill="#fff"/>
-              <rect x="20" y="30" width="8" height="10" fill="#E57328"/>
-              <circle cx="26" cy="35" r="0.8" fill="#fff"/>
-              <rect x="12" y="26" width="6" height="7" fill="#E57328" opacity="0.85" rx="0.8"/>
-              <rect x="13.5" y="27.5" width="3" height="4" fill="#fff" rx="0.4"/>
-              <rect x="30" y="26" width="6" height="7" fill="#E57328" opacity="0.85" rx="0.8"/>
-              <rect x="31.5" y="27.5" width="3" height="4" fill="#fff" rx="0.4"/>
-            </svg>
+          <span class="app-icon has-image">
+            <img class="icon-img" src="https://i.postimg.cc/hv1TbRVr/file-000000009b1081f4a034b2f2c711f242.png" alt="Marketplace">
           </span>
         </span>
         <span class="app-label">Маркетплейс</span>
       </div>
 
-      <div class="app-item">
+      <!-- 📦 СКЛАД -->
+      <div class="app-item semi-big">
         <span class="app-icon-wrap">
-          <span class="app-icon" style="--app-color:#8A6240">
-            <svg viewBox="0 0 48 48" fill="none">
-              <path d="m6 18 18-10 18 10-18 10-18-10Z" fill="#fff"/>
-              <path d="M6 18v14l18 10 18-10V18M24 28v14" stroke="#fff" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
-            </svg>
+          <span class="app-icon has-image">
+            <img class="icon-img" src="https://i.postimg.cc/59hwhpPW/file-00000000944082108b6468b994f0dc54.png" alt="Warehouse">
           </span>
         </span>
         <span class="app-label">Склад</span>
       </div>
 
+      <!-- 📞 ТЕЛЕФОН -->
+      <div class="app-item semi-big">
+        <span class="app-icon-wrap">
+          <span class="app-icon has-image">
+            <img class="icon-img" src="https://i.postimg.cc/SNKJt9hB/file-00000000be8482108e19f7f3de7012ea.png" alt="Phone">
+          </span>
+        </span>
+        <span class="app-label">Телефон</span>
+      </div>
+
+      <!-- 💰 КОШЕЛЁК -->
+      <div class="app-item semi-big">
+        <span class="app-icon-wrap">
+          <span class="app-icon has-image">
+            <img class="icon-img" src="https://i.postimg.cc/HWwxL2YH/file-000000006b388210b07fa7aac704ab53.png" alt="Wallet">
+          </span>
+        </span>
+        <span class="app-label">Кошелёк</span>
+      </div>
+
+      <!-- Магазины -->
       <div class="app-item">
         <span class="app-icon-wrap">
           <span class="app-icon" style="--app-color:#D93E56">
@@ -240,6 +217,7 @@ body::before{
         <span class="app-label">Магазины</span>
       </div>
 
+      <!-- Сотрудники -->
       <div class="app-item">
         <span class="app-icon-wrap">
           <span class="app-icon" style="--app-color:#8657CC">
@@ -254,6 +232,7 @@ body::before{
         <span class="app-label">Сотрудники</span>
       </div>
 
+      <!-- Заметки -->
       <div class="app-item">
         <span class="app-icon-wrap">
           <span class="app-icon" style="--app-color:#D9A207">
@@ -269,6 +248,7 @@ body::before{
         <span class="app-label">Заметки</span>
       </div>
 
+      <!-- Сайт -->
       <div class="app-item">
         <span class="app-icon-wrap">
           <span class="app-icon" style="--app-color:#2E75CC">
@@ -282,6 +262,7 @@ body::before{
         <span class="app-label">Сайт</span>
       </div>
 
+      <!-- Недвижимость -->
       <div class="app-item">
         <span class="app-icon-wrap">
           <span class="app-icon" style="--app-color:#199F7C">
@@ -296,6 +277,7 @@ body::before{
         <span class="app-label">Недвижимость</span>
       </div>
 
+      <!-- Доставка -->
       <div class="app-item">
         <span class="app-icon-wrap">
           <span class="app-icon" style="--app-color:#D89A14">
@@ -310,45 +292,32 @@ body::before{
         <span class="app-label">Доставка</span>
       </div>
 
+      <!-- 💬 СООБЩЕНИЯ -->
+      <div class="app-item">
+        <span class="app-icon-wrap">
+          <span class="app-icon" style="--app-color:#2B8EF0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 11.5a7.3 7.3 0 0 1-7.7 7.3 8.2 8.2 0 0 1-3.6-.8L4 19.5l1.4-4.1A7 7 0 0 1 4.7 12 7.3 7.3 0 0 1 12.3 4 7.3 7.3 0 0 1 20 11.5Z"/>
+            </svg>
+            <span class="app-badge">1</span>
+          </span>
+        </span>
+        <span class="app-label">Сообщения</span>
+      </div>
+
+      <!-- 🛒 МАРКЕТ -->
+      <div class="app-item">
+        <span class="app-icon-wrap">
+          <span class="app-icon" style="--app-color:#E57328">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m4 9 1.4-4h13.2L20 9v2.1a2.5 2.5 0 0 1-4 2 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4-2V9Z" fill="currentColor" stroke="none"/><path d="M5.5 13.1V20h13v-6.9M9 20v-4h6v4"/></svg>
+          </span>
+        </span>
+        <span class="app-label">Маркет</span>
+      </div>
+
     </div>
   </div>
 </div>
-
-<nav class="dock">
-  <div class="dock-item">
-    <span class="dock-app" style="--app-color:#2FB855">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.5 5 5.2c-.8.5-1.1 1.5-.8 2.4 2 6 5.7 9.7 11.7 11.7.9.3 1.9 0 2.4-.8l1.7-3-3.8-2.3-1.7 2c-2.3-1-4.5-3.2-5.5-5.5l2-1.7L8 3.5Z"/></svg>
-    </span>
-    <span class="dock-label">Телефон</span>
-  </div>
-
-  <div class="dock-item">
-    <span class="dock-app" style="--app-color:#2B8EF0">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 11.5a7.3 7.3 0 0 1-7.7 7.3 8.2 8.2 0 0 1-3.6-.8L4 19.5l1.4-4.1A7 7 0 0 1 4.7 12 7.3 7.3 0 0 1 12.3 4 7.3 7.3 0 0 1 20 11.5Z"/>
-      </svg>
-      <span class="dock-badge">1</span>
-    </span>
-    <span class="dock-label">Сообщения</span>
-  </div>
-
-  <div class="dock-item">
-    <span class="dock-app" style="--app-color:#E57328">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m4 9 1.4-4h13.2L20 9v2.1a2.5 2.5 0 0 1-4 2 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4-2V9Z" fill="currentColor" stroke="none"/><path d="M5.5 13.1V20h13v-6.9M9 20v-4h6v4"/></svg>
-    </span>
-    <span class="dock-label">Маркет</span>
-  </div>
-
-  <div class="dock-item">
-    <span class="dock-app" style="--app-color:#9E6538">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-        <path d="M4.5 7.5h13A2.5 2.5 0 0 1 20 10v8.5H4.5A2.5 2.5 0 0 1 2 16V8.5A2.5 2.5 0 0 1 4.5 6H18"/>
-        <path d="M15.5 13h4.5v3h-4.5a1.5 1.5 0 1 1 0-3Z" fill="currentColor" stroke="none"/>
-      </svg>
-    </span>
-    <span class="dock-label">Кошелёк</span>
-  </div>
-</nav>
 
 <script>
 function tick(){
