@@ -6,11 +6,11 @@
 <title>Остров — Выживалка</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100dvh;overflow:hidden;font-family:'Nunito',sans-serif;background:#0a1929}
 
-/* Экран лобби */
 #lobby{
   position:fixed;inset:0;z-index:200;
   background:linear-gradient(160deg,#1a4a6a 0%,#0d2a45 100%);
@@ -36,11 +36,10 @@ html,body{height:100dvh;overflow:hidden;font-family:'Nunito',sans-serif;backgrou
 #joinInput{
   width:100%;max-width:300px;padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,.2);
   background:rgba(255,255,255,.08);color:#fff;font-family:inherit;font-size:16px;font-weight:700;
-  text-align:center;letter-spacing:2px;outline:none;
+  text-align:center;letter-spacing:2px;outline:none;display:none;
 }
 #lobbyStatus{font-size:14px;color:#ffb300;font-weight:700;min-height:20px}
 
-/* Игровой экран */
 #game{
   position:fixed;inset:0;display:none;flex-direction:column;
   background:linear-gradient(180deg,#1a4a6a 0%,#0d2a45 100%);
@@ -62,9 +61,13 @@ html,body{height:100dvh;overflow:hidden;font-family:'Nunito',sans-serif;backgrou
 }
 .hud-stat b{color:#ffb300;font-size:14px}
 
-canvas{display:block;width:100%;height:100%;touch-action:none}
+canvas{display:block;width:100%;height:100%;touch-action:none;position:absolute;inset:0}
+#three-canvas{
+  position:absolute;inset:0;z-index:1;
+  pointer-events:none;
+}
+#cv{z-index:2;background:transparent;position:absolute;inset:0}
 
-/* Мини-игра рыбалки */
 .fishing-ui{
   position:absolute;bottom:100px;left:50%;transform:translateX(-50%);
   z-index:15;background:rgba(0,0,0,.75);padding:16px 20px;border-radius:20px;
@@ -94,7 +97,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 }
 .fishing-ui button:active{transform:scale(.96)}
 
-/* Магазин */
 .shop-btn{
   position:absolute;bottom:20px;right:20px;z-index:12;
   width:60px;height:60px;border-radius:50%;border:0;
@@ -105,17 +107,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 }
 .shop-btn:active{transform:scale(.9)}
 
-.lighthouse-btn{
-  position:absolute;bottom:20px;left:20px;z-index:12;
-  width:60px;height:60px;border-radius:50%;border:0;
-  background:#4a9fd8;color:#fff;font-size:26px;cursor:pointer;
-  box-shadow:0 8px 20px rgba(74,159,216,.4);
-  display:grid;place-items:center;
-  transition:transform .15s;
-}
-.lighthouse-btn:active{transform:scale(.9)}
-
-/* Панели магазина/маяка */
 .panel{
   position:absolute;inset:0;z-index:30;
   background:rgba(0,0,0,.7);backdrop-filter:blur(10px);
@@ -144,52 +135,15 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 .shop-item .info{flex:1;min-width:0}
 .shop-item .name{font-size:15px;font-weight:800;margin-bottom:3px}
 .shop-item .desc{font-size:12px;opacity:.6;line-height:1.3}
-.shop-item .price{
-  font-size:15px;font-weight:900;color:#ffb300;
-  white-space:nowrap;
-}
+.shop-item .price{font-size:15px;font-weight:900;color:#ffb300;white-space:nowrap;}
 .shop-item button{
   padding:10px 16px;border:0;border-radius:12px;
   background:#ffb300;color:#0d2a45;font-family:inherit;
-  font-size:13px;font-weight:800;cursor:pointer;
-  white-space:nowrap;
+  font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;
 }
 .shop-item button:active{transform:scale(.94)}
-.shop-item button:disabled{
-  background:rgba(255,255,255,.15);color:rgba(255,255,255,.4);
-  cursor:not-allowed;
-}
+.shop-item button:disabled{background:rgba(255,255,255,.15);color:rgba(255,255,255,.4);cursor:not-allowed;}
 
-/* Маяк */
-.lighthouse-parts{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.lh-part{
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-  border-radius:14px;padding:14px 16px;
-  display:flex;justify-content:space-between;align-items:center;gap:12px;
-}
-.lh-part.done{background:rgba(46,213,115,.15);border-color:rgba(46,213,115,.4)}
-.lh-part .name{font-weight:800;font-size:14px}
-.lh-part .need{font-size:12px;opacity:.6}
-.lh-part .status{font-weight:900;font-size:14px;color:#ffb300}
-.lh-part.done .status{color:#2ed573}
-
-/* Победный экран */
-.win-screen{
-  position:fixed;inset:0;z-index:100;
-  background:linear-gradient(160deg,rgba(255,179,0,.95),rgba(255,140,0,.95));
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  color:#0d2a45;text-align:center;padding:32px;
-}
-.win-screen.show{display:flex}
-.win-screen h1{font-size:36px;font-weight:900;margin-bottom:12px}
-.win-screen p{font-size:16px;font-weight:600;margin-bottom:24px;max-width:300px}
-.win-screen button{
-  padding:16px 40px;border:0;border-radius:16px;
-  background:#0d2a45;color:#fff;font-family:inherit;
-  font-size:16px;font-weight:800;cursor:pointer;
-}
-
-/* Toast */
 .toast{
   position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
   background:rgba(0,0,0,.9);color:#fff;
@@ -203,21 +157,19 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 </head>
 <body>
 
-<!-- ЛОББИ -->
 <div id="lobby">
   <h1>🏝 <span>ОСТРОВ</span></h1>
-  <p>Выживи с другом на необитаемом острове. Лови рыбу, продавай, построй маяк — и вас спасут!</p>
+  <p>Выживи с другом на необитаемом острове. Лови рыбу, продавай, стань богатым!</p>
 
   <button class="btn-create" id="createBtn">🏝 Создать остров</button>
   <div id="roomCode"></div>
   <p id="lobbyStatus"></p>
 
   <button class="btn-join" id="showJoinBtn">🔗 Присоединиться</button>
-  <input type="text" id="joinInput" placeholder="ВВЕДИ КОД" maxlength="6" style="display:none">
+  <input type="text" id="joinInput" placeholder="ВВЕДИ КОД" maxlength="6">
   <button class="btn-join" id="joinBtn" style="display:none">✅ Войти на остров</button>
 </div>
 
-<!-- ИГРА -->
 <div id="game">
   <div class="hud">
     <div class="hud-stat">💰 <b id="hudMoney">0</b></div>
@@ -226,13 +178,10 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
   </div>
 
   <canvas id="cv"></canvas>
+  <canvas id="three-canvas"></canvas>
 
-  <!-- Кнопка магазина -->
   <button class="shop-btn" id="shopBtn">🛒</button>
-  <!-- Кнопка маяка -->
-  <button class="lighthouse-btn" id="lhBtn">🗼</button>
 
-  <!-- Мини-игра рыбалки -->
   <div class="fishing-ui" id="fishUI">
     <div class="fishing-title">🎣 Клюёт! Жми когда в зелёной зоне</div>
     <div class="fish-bar">
@@ -243,7 +192,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
     <button id="fishBtn">ПОЙМАТЬ!</button>
   </div>
 
-  <!-- Магазин -->
   <div class="panel" id="shopPanel">
     <div class="panel-head">
       <h2>🛒 <span>Магазин</span></h2>
@@ -251,25 +199,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
     </div>
     <div id="shopList"></div>
   </div>
-
-  <!-- Маяк -->
-  <div class="panel" id="lhPanel">
-    <div class="panel-head">
-      <h2>🗼 <span>Маяк</span></h2>
-      <button class="panel-close" id="lhClose">✕</button>
-    </div>
-    <p style="font-size:13px;opacity:.6;margin-bottom:16px;line-height:1.5">
-      Построй все детали маяка — и вас заметят с корабля. Игра завершится победой!
-    </p>
-    <div class="lighthouse-parts" id="lhParts"></div>
-  </div>
-</div>
-
-<!-- Победа -->
-<div class="win-screen" id="winScreen">
-  <h1>🎉 СПАСЕНЫ!</h1>
-  <p>Вы построили маяк, и корабль забрал вас с острова!</p>
-  <button onclick="location.reload()">Играть снова</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -277,49 +206,29 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 <script>
 /* ═══════════════ КОНФИГ ═══════════════ */
 const WORLD_SIZE = 2000;
-const TILE = 40;
 
-/* ═══════════════ СОСТОЯНИЕ ИГРЫ ═══════════════ */
+/* ═══════════════ СОСТОЯНИЕ ═══════════════ */
 let state = {
   money: 0,
   fish: 0,
   food: 100,
   players: {},
-  me: { x: 1000, y: 1000, name: 'Ты' },
-  fishing: null,
-  lighthouse: {
-    base: false,
-    tower: false,
-    top: false,
-    lamp: false,
-    glass: false
-  }
+  me: { x: 1000, y: 1000, vx: 0, vy: 0, name: 'Ты', angle: 0 },
+  fishing: null
 };
 
 const SHOP = [
   { id: 'rod', name: '🎣 Удочка', desc: 'Позволяет ловить рыбу', price: 20, oneTime: true },
   { id: 'bait', name: '🪱 Приманка x5', desc: 'Рыба клюёт чаще', price: 10 },
-  { id: 'wood', name: '🪵 Доски x10', desc: 'Материал для маяка', price: 15 },
   { id: 'food', name: '🍞 Еда x30', desc: 'Восстановить сытость', price: 8 }
-];
-
-const LIGHTHOUSE_PARTS = [
-  { id: 'base',   name: '🪨 Основание',   need: 20, needName: 'досок' },
-  { id: 'tower',  name: '🏗 Стены',       need: 15, needName: 'досок' },
-  { id: 'top',    name: '🔺 Крыша',       need: 10, needName: 'досок' },
-  { id: 'lamp',   name: '💡 Лампа',       need: 30, needName: 'монет' },
-  { id: 'glass',  name: '🔷 Стекло',      need: 40, needName: 'монет' }
 ];
 
 /* ═══════════════ СЕТЬ ═══════════════ */
 let peer = null, conn = null, roomId = null, isHost = false;
-
 const lobby = document.getElementById('lobby');
 const lobbyStatus = document.getElementById('lobbyStatus');
 
-function genCode(){
-  return Math.random().toString(36).substring(2,8).toUpperCase();
-}
+function genCode(){ return Math.random().toString(36).substring(2,8).toUpperCase(); }
 
 document.getElementById('createBtn').addEventListener('click',()=>{
   isHost = true;
@@ -333,13 +242,8 @@ document.getElementById('createBtn').addEventListener('click',()=>{
     document.getElementById('roomCode').textContent = roomId;
     lobbyStatus.textContent = 'Ждём друга... Отправь ему код ↑';
   });
-  peer.on('connection',(c)=>{
-    conn = c;
-    setupConn();
-  });
-  peer.on('error',(e)=>{
-    lobbyStatus.textContent = 'Ошибка: '+e.message;
-  });
+  peer.on('connection',(c)=>{ conn = c; setupConn(); });
+  peer.on('error',(e)=>{ lobbyStatus.textContent = 'Ошибка: '+e.message; });
 });
 
 document.getElementById('showJoinBtn').addEventListener('click',()=>{
@@ -358,9 +262,7 @@ document.getElementById('joinBtn').addEventListener('click',()=>{
     conn = peer.connect('island-'+code);
     setupConn();
   });
-  peer.on('error',(e)=>{
-    lobbyStatus.textContent = 'Ошибка: '+e.message;
-  });
+  peer.on('error',(e)=>{ lobbyStatus.textContent = 'Ошибка: '+e.message; });
 });
 
 function setupConn(){
@@ -370,12 +272,8 @@ function setupConn(){
     initGame();
     startNetwork();
   });
-  conn.on('data',(data)=>{
-    handleNetworkData(data);
-  });
-  conn.on('close',()=>{
-    showToast('Соединение потеряно');
-  });
+  conn.on('data',(data)=>{ handleNetworkData(data); });
+  conn.on('close',()=>{ showToast('Соединение потеряно'); });
 }
 
 let lastSent = 0;
@@ -383,12 +281,8 @@ function startNetwork(){
   setInterval(()=>{
     if(!conn || !conn.open) return;
     const now = Date.now();
-    if(now - lastSent > 50){ // 20 раз/сек
-      conn.send({
-        type: 'pos',
-        x: state.me.x,
-        y: state.me.y
-      });
+    if(now - lastSent > 50){
+      conn.send({ type:'pos', x:state.me.x, y:state.me.y, angle:state.me.angle });
       lastSent = now;
     }
   }, 50);
@@ -397,24 +291,18 @@ function startNetwork(){
 function handleNetworkData(data){
   if(data.type === 'pos'){
     state.players.friend = {
-      x: data.x,
-      y: data.y,
-      name: 'Друг',
-      lastUpdate: Date.now()
+      x: data.x, y: data.y, angle: data.angle || 0,
+      name: 'Друг', lastUpdate: Date.now()
     };
   }
-  if(data.type === 'action'){
-    showToast('Друг: '+data.text);
-  }
+  if(data.type === 'action'){ showToast('Друг: '+data.text); }
 }
 
 function sendAction(text){
-  if(conn && conn.open){
-    conn.send({type:'action', text});
-  }
+  if(conn && conn.open) conn.send({type:'action', text});
 }
 
-/* ═══════════════ CANVAS ═══════════════ */
+/* ═══════════════ 2Д CANVAS (мир) ═══════════════ */
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 let camX = 0, camY = 0;
@@ -422,16 +310,199 @@ let camX = 0, camY = 0;
 function resize(){
   cv.width = window.innerWidth;
   cv.height = window.innerHeight;
+  if(renderer){
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  }
 }
 resize();
 window.addEventListener('resize', resize);
 
+/* ═══════════════ 3Д THREE.JS (персонажи) ═══════════════ */
+let renderer, scene, camera;
+let myCharacter, friendCharacter;
+
+function initThree(){
+  const threeCanvas = document.getElementById('three-canvas');
+
+  renderer = new THREE.WebGLRenderer({
+    canvas: threeCanvas,
+    alpha: true,
+    antialias: true
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = false;
+
+  scene = new THREE.Scene();
+
+  // Ортографическая камера — вид сверху под небольшим углом (2.5Д)
+  const frustum = 250;
+  const aspect = window.innerWidth / window.innerHeight;
+  camera = new THREE.OrthographicCamera(
+    -frustum * aspect / 2, frustum * aspect / 2,
+    frustum / 2, -frustum / 2,
+    0.1, 1000
+  );
+
+  // Свет
+  const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+  scene.add(ambient);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+  dirLight.position.set(5, 10, 5);
+  scene.add(dirLight);
+
+  // Мой персонаж
+  myCharacter = createHumanoid(0x999999); // серый
+  scene.add(myCharacter);
+
+  // Друг (скрыт пока не подключится)
+  friendCharacter = createHumanoid(0x4a9fd8); // синий для друга
+  friendCharacter.visible = false;
+  scene.add(friendCharacter);
+}
+
+/* Создаём человечка из примитивов */
+function createHumanoid(color){
+  const group = new THREE.Group();
+
+  // Материал с желейным видом
+  const mat = new THREE.MeshStandardMaterial({
+    color: color,
+    roughness: 0.6,
+    metalness: 0.1
+  });
+
+  // ТЕЛО (цилиндр/капсула)
+  const bodyGeo = new THREE.CapsuleGeometry(6, 10, 4, 8);
+  const body = new THREE.Mesh(bodyGeo, mat);
+  body.position.y = 12;
+  group.add(body);
+
+  // ГОЛОВА (сфера)
+  const headGeo = new THREE.SphereGeometry(6, 12, 12);
+  const head = new THREE.Mesh(headGeo, mat);
+  head.position.y = 26;
+  group.add(head);
+
+  // ГЛАЗА
+  const eyeGeo = new THREE.SphereGeometry(1.2, 8, 8);
+  const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+  const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+  eyeL.position.set(-2.2, 27, 5.5);
+  group.add(eyeL);
+  const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+  eyeR.position.set(2.2, 27, 5.5);
+  group.add(eyeR);
+
+  // РУКИ
+  const armGeo = new THREE.CapsuleGeometry(1.8, 8, 3, 6);
+  const armL = new THREE.Mesh(armGeo, mat);
+  armL.position.set(-8, 14, 0);
+  armL.rotation.z = 0.3;
+  armL.name = 'armL';
+  group.add(armL);
+
+  const armR = new THREE.Mesh(armGeo, mat);
+  armR.position.set(8, 14, 0);
+  armR.rotation.z = -0.3;
+  armR.name = 'armR';
+  group.add(armR);
+
+  // НОГИ
+  const legGeo = new THREE.CapsuleGeometry(2, 8, 3, 6);
+  const legL = new THREE.Mesh(legGeo, mat);
+  legL.position.set(-3, 3, 0);
+  legL.name = 'legL';
+  group.add(legL);
+
+  const legR = new THREE.Mesh(legGeo, mat);
+  legR.position.set(3, 3, 0);
+  legR.name = 'legR';
+  group.add(legR);
+
+  group.userData = {
+    arms: { L: armL, R: armR },
+    legs: { L: legL, R: legR },
+    body, head,
+    squash: 1,
+    walkTime: 0
+  };
+
+  return group;
+}
+
+/* Желейная анимация персонажа */
+function animateCharacter(char, isMoving, dt){
+  if(!char) return;
+  const ud = char.userData;
+  ud.walkTime += dt * (isMoving ? 12 : 3);
+
+  // Желейное дыхание — тело пульсирует
+  const breathe = 1 + Math.sin(ud.walkTime) * 0.05;
+
+  if(isMoving){
+    // Покачивание при беге — руки/ноги болтаются
+    const swing = Math.sin(ud.walkTime) * 0.8;
+    ud.arms.L.rotation.z = 0.3 + swing;
+    ud.arms.R.rotation.z = -0.3 + swing;
+    ud.arms.L.rotation.x = swing * 0.4;
+    ud.arms.R.rotation.x = -swing * 0.4;
+    ud.legs.L.rotation.x = swing * 0.7;
+    ud.legs.R.rotation.x = -swing * 0.7;
+
+    // Растягивание тела при беге — вытягивается по направлению движения
+    char.scale.set(0.95, 1.08 * breathe, 0.95);
+  } else {
+    // Стоит — мягкое покачивание, руки/ноги чуть опущены
+    const idle = Math.sin(ud.walkTime * 0.5) * 0.15;
+    ud.arms.L.rotation.z = 0.3 + idle;
+    ud.arms.R.rotation.z = -0.3 - idle;
+    ud.arms.L.rotation.x = idle * 0.5;
+    ud.arms.R.rotation.x = -idle * 0.5;
+    ud.legs.L.rotation.x = idle * 0.3;
+    ud.legs.R.rotation.x = -idle * 0.3;
+
+    // Дыхание — плавный скейл
+    char.scale.set(1 + Math.sin(ud.walkTime*0.5)*0.02, breathe, 1 + Math.sin(ud.walkTime*0.5)*0.02);
+  }
+
+  // Голова чуть отдельно покачивается (эффект желе)
+  ud.head.rotation.z = Math.sin(ud.walkTime * 1.2) * 0.1;
+  ud.head.rotation.x = Math.sin(ud.walkTime * 0.9) * 0.08;
+}
+
+/* ═══════════════ ИНИЦИАЛИЗАЦИЯ ═══════════════ */
+function initGame(){
+  state.me.x = 1000;
+  state.me.y = 1000;
+  initThree();
+  updateHUD();
+  renderShop();
+  gameLoop();
+}
+
+/* ═══════════════ ИГРОВОЙ ЦИКЛ ═══════════════ */
+let lastTime = 0;
+
+function gameLoop(now){
+  now = now || performance.now();
+  const dt = Math.min((now - lastTime) / 1000, 0.05);
+  lastTime = now;
+
+  update(dt);
+  render();
+  renderThree();
+
+  requestAnimationFrame(gameLoop);
+}
+
 /* Управление */
 let keys = {};
-let joystick = { active: false, startX: 0, startY: 0, curX: 0, curY: 0, id: null };
+let joystick = { active:false, startX:0, startY:0, curX:0, curY:0, id:null };
 
 cv.addEventListener('pointerdown',(e)=>{
-  // если это мультитач — считаем как джойстик
   if(e.clientX < cv.width * 0.6 && !joystick.active){
     joystick.active = true;
     joystick.startX = e.clientX;
@@ -440,7 +511,6 @@ cv.addEventListener('pointerdown',(e)=>{
     joystick.curY = e.clientY;
     joystick.id = e.pointerId;
   } else {
-    // тап по воде — рыбалка
     handleTap(e.clientX, e.clientY);
   }
 });
@@ -459,38 +529,18 @@ cv.addEventListener('pointerup',(e)=>{
   }
 });
 
-/* Клавиатура для ПК */
 document.addEventListener('keydown',(e)=>keys[e.key.toLowerCase()]=true);
 document.addEventListener('keyup',(e)=>keys[e.key.toLowerCase()]=false);
 
-/* ═══════════════ ИНИЦИАЛИЗАЦИЯ ═══════════════ */
-function initGame(){
-  state.me.x = 1000;
-  state.me.y = 1000;
-  updateHUD();
-  renderShop();
-  renderLighthouse();
-  gameLoop();
-}
-
-/* ═══════════════ ИГРОВОЙ ЦИКЛ ═══════════════ */
-function gameLoop(){
-  update();
-  render();
-  requestAnimationFrame(gameLoop);
-}
-
-function update(){
+function update(dt){
   let dx = 0, dy = 0;
   const speed = 4;
 
-  // Клавиатура
   if(keys['w']||keys['ц']||keys['arrowup']) dy -= speed;
   if(keys['s']||keys['ы']||keys['arrowdown']) dy += speed;
   if(keys['a']||keys['ф']||keys['arrowleft']) dx -= speed;
   if(keys['d']||keys['в']||keys['arrowright']) dx += speed;
 
-  // Джойстик
   if(joystick.active){
     const jdx = joystick.curX - joystick.startX;
     const jdy = joystick.curY - joystick.startY;
@@ -502,36 +552,40 @@ function update(){
     }
   }
 
-  // Ограничения по миру
-  state.me.x = Math.max(50, Math.min(WORLD_SIZE-50, state.me.x + dx));
-  state.me.y = Math.max(50, Math.min(WORLD_SIZE-50, state.me.y + dy));
+  // Сглаживание движения — для желейного эффекта
+  state.me.vx = (state.me.vx || 0) * 0.7 + dx * 0.3;
+  state.me.vy = (state.me.vy || 0) * 0.7 + dy * 0.3;
 
-  // Камера следует за игроком
+  state.me.x = Math.max(50, Math.min(WORLD_SIZE-50, state.me.x + state.me.vx));
+  state.me.y = Math.max(50, Math.min(WORLD_SIZE-50, state.me.y + state.me.vy));
+
+  // Угол поворота — по направлению движения
+  if(Math.abs(state.me.vx) > 0.3 || Math.abs(state.me.vy) > 0.3){
+    state.me.angle = Math.atan2(state.me.vy, state.me.vx);
+  }
+
   camX = state.me.x - cv.width/2;
   camY = state.me.y - cv.height/2;
 
-  // Еда уменьшается со временем
-  if(Math.random() < 0.0005) {
+  if(Math.random() < 0.0005){
     state.food = Math.max(0, state.food - 1);
     updateHUD();
   }
 }
 
 function render(){
-  // Фон — вода
   ctx.fillStyle = '#1a4a6a';
   ctx.fillRect(0,0,cv.width,cv.height);
 
   ctx.save();
   ctx.translate(-camX, -camY);
 
-  // Остров — песок
+  // Остров
   ctx.fillStyle = '#e6c68a';
   ctx.beginPath();
   ctx.arc(1000, 1000, 550, 0, Math.PI*2);
   ctx.fill();
 
-  // Трава в центре
   ctx.fillStyle = '#7ab648';
   ctx.beginPath();
   ctx.arc(1000, 1000, 400, 0, Math.PI*2);
@@ -542,21 +596,22 @@ function render(){
   drawPalm(1200, 850);
   drawPalm(950, 1250);
 
-  // Маяк (строится)
-  drawLighthouse(1000, 700);
+  // Тени игроков (в 2Д слое)
+  ctx.beginPath();
+  ctx.ellipse(state.me.x, state.me.y + 5, 14, 6, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(0,0,0,.3)';
+  ctx.fill();
 
-  // Друг
   if(state.players.friend){
     const f = state.players.friend;
-    drawPlayer(f.x, f.y, '#4a9fd8', f.name);
+    ctx.beginPath();
+    ctx.ellipse(f.x, f.y + 5, 14, 6, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(0,0,0,.3)';
+    ctx.fill();
   }
-
-  // Я
-  drawPlayer(state.me.x, state.me.y, '#ffb300', 'Ты');
 
   ctx.restore();
 
-  // Джойстик
   if(joystick.active){
     ctx.beginPath();
     ctx.arc(joystick.startX, joystick.startY, 50, 0, Math.PI*2);
@@ -578,108 +633,55 @@ function render(){
   }
 }
 
-function drawPlayer(x, y, color, name){
-  // Тень
-  ctx.beginPath();
-  ctx.ellipse(x, y+15, 15, 6, 0, 0, Math.PI*2);
-  ctx.fillStyle = 'rgba(0,0,0,.3)';
-  ctx.fill();
-
-  // Тело
-  ctx.beginPath();
-  ctx.arc(x, y, 18, 0, Math.PI*2);
-  ctx.fillStyle = color;
-  ctx.fill();
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // Глаза
-  ctx.beginPath();
-  ctx.arc(x-6, y-4, 3, 0, Math.PI*2);
-  ctx.arc(x+6, y-4, 3, 0, Math.PI*2);
-  ctx.fillStyle = '#0d2a45';
-  ctx.fill();
-
-  // Имя
-  ctx.font = 'bold 13px Nunito';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#fff';
-  ctx.strokeStyle = 'rgba(0,0,0,.6)';
-  ctx.lineWidth = 3;
-  ctx.strokeText(name, x, y-28);
-  ctx.fillText(name, x, y-28);
-}
-
 function drawPalm(x, y){
-  // Ствол
   ctx.fillStyle = '#7a4a2a';
   ctx.fillRect(x-5, y-40, 10, 60);
-
-  // Листья
   ctx.fillStyle = '#2d8a3a';
   for(let i=0; i<5; i++){
     const angle = (Math.PI*2/5)*i;
     ctx.beginPath();
-    ctx.ellipse(
-      x + Math.cos(angle)*25,
-      y - 50 + Math.sin(angle)*15,
-      25, 10, angle, 0, Math.PI*2
-    );
+    ctx.ellipse(x + Math.cos(angle)*25, y - 50 + Math.sin(angle)*15, 25, 10, angle, 0, Math.PI*2);
     ctx.fill();
   }
 }
 
-function drawLighthouse(x, y){
-  // Основание (если куплено)
-  if(state.lighthouse.base){
-    ctx.fillStyle = '#8b7355';
-    ctx.beginPath();
-    ctx.arc(x, y+40, 60, 0, Math.PI*2);
-    ctx.fill();
+/* ═══════════════ 3Д РЕНДЕР ═══════════════ */
+const frustumSize = 250;
+
+function renderThree(){
+  if(!renderer || !camera) return;
+
+  // Позиция камеры — сверху под углом 45°
+  camera.position.set(
+    state.me.x,
+    160,
+    state.me.y + 120
+  );
+  camera.lookAt(state.me.x, 0, state.me.y);
+
+  // Мой персонаж
+  if(myCharacter){
+    myCharacter.position.set(state.me.x, 8, state.me.y);
+    myCharacter.rotation.y = -state.me.angle + Math.PI/2;
+
+    const speed = Math.hypot(state.me.vx || 0, state.me.vy || 0);
+    const isMoving = speed > 0.5;
+    animateCharacter(myCharacter, isMoving, 0.016);
   }
-  // Стены
-  if(state.lighthouse.tower){
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x-30, y-40, 60, 80);
-    ctx.strokeStyle = '#c43e3e';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x-30, y-40, 60, 80);
-    // Красные полосы
-    ctx.fillStyle = '#c43e3e';
-    ctx.fillRect(x-30, y-30, 60, 15);
-    ctx.fillRect(x-30, y+5, 60, 15);
+
+  // Друг
+  if(friendCharacter){
+    if(state.players.friend){
+      friendCharacter.visible = true;
+      friendCharacter.position.set(state.players.friend.x, 8, state.players.friend.y);
+      friendCharacter.rotation.y = -(state.players.friend.angle || 0) + Math.PI/2;
+      animateCharacter(friendCharacter, true, 0.016);
+    } else {
+      friendCharacter.visible = false;
+    }
   }
-  // Крыша
-  if(state.lighthouse.top){
-    ctx.fillStyle = '#c43e3e';
-    ctx.beginPath();
-    ctx.moveTo(x-40, y-40);
-    ctx.lineTo(x, y-80);
-    ctx.lineTo(x+40, y-40);
-    ctx.closePath();
-    ctx.fill();
-  }
-  // Лампа
-  if(state.lighthouse.lamp){
-    ctx.fillStyle = '#ffeb3b';
-    ctx.beginPath();
-    ctx.arc(x, y-55, 15, 0, Math.PI*2);
-    ctx.fill();
-    // Свечение
-    ctx.beginPath();
-    ctx.arc(x, y-55, 30, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(255,235,59,.3)';
-    ctx.fill();
-  }
-  // Стекло
-  if(state.lighthouse.glass){
-    ctx.strokeStyle = 'rgba(150,220,255,.9)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(x, y-55, 22, 0, Math.PI*2);
-    ctx.stroke();
-  }
+
+  renderer.render(scene, camera);
 }
 
 /* ═══════════════ РЫБАЛКА ═══════════════ */
@@ -690,26 +692,20 @@ function handleTap(x, y){
   const worldY = y + camY;
   const dist = Math.hypot(worldX - 1000, worldY - 1000);
 
-  // В воде (за 550px от центра)
   if(dist > 550){
-    if(!hasRod()){
-      showToast('Нужна удочка! Купи в магазине 🛒');
-      return;
-    }
+    if(!hasRod()){ showToast('Нужна удочка! Купи в магазине 🛒'); return; }
     startFishing();
   }
 }
 
-function hasRod(){
-  return window._hasRod || false;
-}
+function hasRod(){ return window._hasRod || false; }
 
 function startFishing(){
   if(fishingState) return;
   fishingState = {
     cursorPos: 0,
     direction: 1,
-    zoneStart: 40 + Math.random()*30, // 40-70%
+    zoneStart: 40 + Math.random()*30,
     zoneSize: 25,
     speed: 1.2
   };
@@ -721,14 +717,8 @@ function startFishing(){
 function animateFishing(){
   if(!fishingState) return;
   fishingState.cursorPos += fishingState.direction * fishingState.speed;
-  if(fishingState.cursorPos >= 100){
-    fishingState.cursorPos = 100;
-    fishingState.direction = -1;
-  }
-  if(fishingState.cursorPos <= 0){
-    fishingState.cursorPos = 0;
-    fishingState.direction = 1;
-  }
+  if(fishingState.cursorPos >= 100){ fishingState.cursorPos = 100; fishingState.direction = -1; }
+  if(fishingState.cursorPos <= 0){ fishingState.cursorPos = 0; fishingState.direction = 1; }
   updateFishingUI();
   requestAnimationFrame(animateFishing);
 }
@@ -779,15 +769,9 @@ function renderShop(){
   SHOP.forEach(item=>{
     const div = document.createElement('div');
     div.className = 'shop-item';
-
-    // Проверка: куплено ли уже (для oneTime)
     let canBuy = state.money >= item.price;
     let owned = false;
-    if(item.id === 'rod' && window._hasRod){
-      owned = true;
-      canBuy = false;
-    }
-
+    if(item.id === 'rod' && window._hasRod){ owned = true; canBuy = false; }
     div.innerHTML = `
       <div class="info">
         <div class="name">${item.name}</div>
@@ -800,12 +784,8 @@ function renderShop(){
     `;
     list.appendChild(div);
   });
-
   list.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const id = btn.dataset.id;
-      buyItem(id);
-    });
+    btn.addEventListener('click',()=>buyItem(btn.dataset.id));
   });
 }
 
@@ -813,9 +793,7 @@ function buyItem(id){
   const item = SHOP.find(i=>i.id===id);
   if(!item) return;
   if(state.money < item.price){ showToast('Не хватает монет'); return; }
-
   state.money -= item.price;
-
   if(id === 'rod'){
     window._hasRod = true;
     showToast('🎣 Теперь можешь ловить рыбу! Тапни по воде');
@@ -824,78 +802,13 @@ function buyItem(id){
     window._bait = (window._bait||0) + 5;
     showToast('🪱 +5 приманок');
   }
-  if(id === 'wood'){
-    window._wood = (window._wood||0) + 10;
-    showToast('🪵 +10 досок');
-  }
   if(id === 'food'){
     state.food = Math.min(100, state.food + 30);
     showToast('🍞 +30 сытости');
   }
-
   updateHUD();
   renderShop();
-  renderLighthouse();
 }
-
-/* ═══════════════ МАЯК ═══════════════ */
-const lhPanel = document.getElementById('lhPanel');
-document.getElementById('lhBtn').addEventListener('click',()=>{
-  lhPanel.classList.add('show');
-  renderLighthouse();
-});
-document.getElementById('lhClose').addEventListener('click',()=>{
-  lhPanel.classList.remove('show');
-});
-
-function renderLighthouse(){
-  const list = document.getElementById('lhParts');
-  list.innerHTML = '';
-  LIGHTHOUSE_PARTS.forEach(part=>{
-    const done = state.lighthouse[part.id];
-    const div = document.createElement('div');
-    div.className = 'lh-part' + (done?' done':'');
-
-    const isWood = part.needName === 'досок';
-    const have = isWood ? (window._wood||0) : state.money;
-
-    div.innerHTML = `
-      <div>
-        <div class="name">${part.name}</div>
-        <div class="need">${part.need} ${part.needName} · у тебя: ${have}</div>
-      </div>
-      <div class="status">${done?'✓ Готово':'Не построено'}</div>
-    `;
-    list.appendChild(div);
-  });
-}
-
-/* Автопостройка если хватает ресурсов */
-setInterval(()=>{
-  LIGHTHOUSE_PARTS.forEach(part=>{
-    if(state.lighthouse[part.id]) return;
-    const isWood = part.needName === 'досок';
-    const have = isWood ? (window._wood||0) : state.money;
-    if(have >= part.need){
-      if(isWood){
-        window._wood -= part.need;
-      } else {
-        state.money -= part.need;
-      }
-      state.lighthouse[part.id] = true;
-      showToast('🏗 Построено: '+part.name);
-      sendAction('построил '+part.name);
-      updateHUD();
-      renderLighthouse();
-      renderShop();
-
-      // Проверка победы
-      if(Object.values(state.lighthouse).every(v=>v)){
-        document.getElementById('winScreen').classList.add('show');
-      }
-    }
-  });
-}, 1000);
 
 /* ═══════════════ TOAST ═══════════════ */
 let toastTimer = null;
